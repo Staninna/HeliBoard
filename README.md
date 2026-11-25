@@ -1,4 +1,16 @@
 # HeliBoard
+
+> **This is a personal fork** (Staninna/HeliBoard), released from this repository's
+> [Releases](https://github.com/Staninna/HeliBoard/releases) page. It keeps upstream's app ID
+> `helium314.keyboard` but uses its own signing key. That has two consequences:
+> - To install it, uninstall stock HeliBoard first. Export a backup in HeliBoard's settings first
+>   if you want to keep your settings and learned words.
+> - F-Droid, IzzyOnDroid and Obtainium will keep offering stock HeliBoard updates. Those fail with a
+>   signature mismatch. That is expected: update this fork from its own releases instead.
+>
+> Unlike upstream, later fork releases add the INTERNET permission, used only by opt-in features.
+> Everything below is upstream's README.
+
 HeliBoard is a privacy-conscious and customizable open-source keyboard, based on AOSP / OpenBoard.
 Does not use internet permission, and thus is 100% offline.
 
