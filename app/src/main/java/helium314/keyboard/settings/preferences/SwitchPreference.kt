@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.settings.preferences
 
-import androidx.compose.material3.Switch
+import helium314.keyboard.fork.ui.Switch // fork: switch with thumb icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue

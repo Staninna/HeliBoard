@@ -61,7 +61,7 @@
     <style
         name="PopupKeysKeyboardView.Rounded_Base_Border"
         parent="PopupKeysKeyboardView.Rounded_Base">
-        <item name="android:background">@drawable/keyboard_popup_panel_background_rounded_base</item>
+        <item name="android:background">@drawable/fork_popup_panel_background</item> <!-- fork: rounded surface -->
         <item name="keyBackground">@drawable/btn_keyboard_key_popup_rounded_base</item>
     </style>
 

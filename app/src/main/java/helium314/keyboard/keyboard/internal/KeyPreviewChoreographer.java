@@ -10,7 +10,9 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
+import helium314.keyboard.fork.ForkPopups;
 import helium314.keyboard.keyboard.Key;
+import helium314.keyboard.keyboard.KeyboardTheme;
 import helium314.keyboard.latin.common.ColorType;
 import helium314.keyboard.latin.common.Colors;
 import helium314.keyboard.latin.common.CoordinateUtils;
@@ -109,6 +111,11 @@ public final class KeyPreviewChoreographer {
         keyPreviewView.setPreviewBackground(hasPopupKeys, keyPreviewPosition);
         Colors colors = Settings.getValues().mColors;
         colors.setBackground(keyPreviewView, ColorType.KEY_PREVIEW_BACKGROUND);
+        if (!KeyboardTheme.STYLE_HOLO.equals(colors.getThemeStyle())) { // fork: raised, a step apart from the keys
+            keyPreviewView.getBackground().setColorFilter(new android.graphics.PorterDuffColorFilter(
+                    ForkPopups.previewColor(colors), android.graphics.PorterDuff.Mode.SRC_IN));
+            ForkPopups.elevatePreview(keyPreviewView);
+        }
 
         // The key preview is placed vertically above the top edge of the parent key with an
         // arbitrary offset.

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material Icons "call_to_action", flipped so the bar is on top, Apache-2.0, Google -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group android:pivotY="12" android:scaleY="-1">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M21,3L3,3c-1.1,0 -2,0.9 -2,2v14c0,1.1 0.9,2 2,2h18c1.1,0 2,-0.9 2,-2L23,5c0,-1.1 -0.9,-2 -2,-2zM21,19L3,19v-3h18v3z" />
+    </group>
+</vector>

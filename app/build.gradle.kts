@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "helium314.keyboard"
-        minSdk = 21
+        minSdk = 31 // fork: Android 12, for Material You colors and current Compose
         targetSdk = 37
         versionCode = 4301
         versionName = "4.3-beta2"
@@ -117,7 +117,7 @@ android {
 
 dependencies {
     // androidx
-    implementation("androidx.core:core-ktx:1.17.0") // 1.18.0 requires minSdk 23
+    implementation("androidx.core:core-ktx:1.19.1") // fork: minSdk 31 allows current versions
     implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("androidx.autofill:autofill:1.3.0")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
@@ -127,14 +127,14 @@ dependencies {
 
     // compose
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
-    implementation(platform("androidx.compose:compose-bom:2025.11.01")) // newer requires minSdk 23
+    implementation(platform("androidx.compose:compose-bom:2026.11.01")) // fork: minSdk 31 allows current versions
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
     "debugNoMinifyImplementation"("androidx.compose.ui:ui-tooling")
     implementation("androidx.navigation:navigation-compose:2.9.8")
     implementation("sh.calvin.reorderable:reorderable:3.1.0") // for easier re-ordering
-    implementation("com.github.skydoves:colorpicker-compose:1.1.3") // for user-defined colors, newer requires minSdk 23
+    implementation("com.github.skydoves:colorpicker-compose:1.3.0") // for user-defined colors; fork: newer with minSdk 31
 
     // test
     testImplementation(kotlin("test"))

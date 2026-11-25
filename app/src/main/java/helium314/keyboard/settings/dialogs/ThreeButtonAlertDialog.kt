@@ -56,19 +56,20 @@ fun ThreeButtonAlertDialog(
             modifier = modifier.widthIn(min = 280.dp, max = 560.dp),
             propagateMinConstraints = true
         ) {
+            // fork: Material 3 dialog: 28 dp corners, raised container color, 24 dp padding, headline title
             Surface(
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.surface,
-                contentColor = contentColorFor(MaterialTheme.colorScheme.surface),
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
             ) {
                 Column(modifier = Modifier.padding(
-                    start = if (reducePadding) 8.dp else 16.dp,
-                    end = if (reducePadding) 8.dp else 16.dp,
-                    top = if (reducePadding) 8.dp else 16.dp,
-                    bottom = if (reducePadding) 2.dp else 6.dp
+                    start = if (reducePadding) 12.dp else 24.dp,
+                    end = if (reducePadding) 12.dp else 24.dp,
+                    top = if (reducePadding) 12.dp else 24.dp,
+                    bottom = if (reducePadding) 8.dp else 18.dp
                 )) {
                     title?.let {
-                        CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.titleMedium) {
+                        CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.headlineSmall) {
                             Box(Modifier.padding(PaddingValues(bottom = if (reducePadding) 4.dp else 16.dp))) {
                                 title()
                             }

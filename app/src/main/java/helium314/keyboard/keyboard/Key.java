@@ -847,6 +847,11 @@ public class Key implements Comparable<Key> {
         mPressed = false;
     }
 
+    // fork: popups pick a readable text color for the pressed key
+    public final boolean isPressed() {
+        return mPressed;
+    }
+
     public final boolean isEnabled() {
         return mEnabled;
     }

@@ -26,4 +26,7 @@
     <string name="fork_kaomoji_sweat">Awkward</string>
     <string name="fork_kaomoji_displeasure">Annoyed</string>
     <string name="fork_kaomoji_surprise">Surprised</string>
+    <string name="fork_resize_smaller">Smaller</string>
+    <string name="fork_resize_larger">Larger</string>
+    <string name="fork_clipboard_empty">Text you copy shows up here.\nLong-press a clip to pin it.</string>
 </resources>

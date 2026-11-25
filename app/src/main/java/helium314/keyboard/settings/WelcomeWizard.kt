@@ -21,6 +21,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.ui.draw.clip
+import helium314.keyboard.fork.ui.ForkUi
+import helium314.keyboard.fork.ui.segmentShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -79,17 +86,19 @@ fun WelcomeWizard(
             }
     }
     val useWideLayout = isWideScreen()
-    val stepBackgroundColor = Color(ContextCompat.getColor(ctx, R.color.setup_step_background))
-    val textColor = Color(ContextCompat.getColor(ctx, R.color.setup_text_action))
-    val textColorDim = textColor.copy(alpha = 0.5f)
-    val titleColor = Color(ContextCompat.getColor(ctx, R.color.setup_text_title))
+    // fork: theme colors and rounded segments like the settings screens, instead of fixed blue blocks
+    val stepBackgroundColor = ForkUi.cardColor
+    val textColor = MaterialTheme.colorScheme.onSurface
+    val textColorDim = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+    val titleColor = MaterialTheme.colorScheme.primary
+    fun segment(index: Int, count: Int) = segmentShape(index, count)
     val appName = stringResource(ctx.applicationInfo.labelRes)
     @Composable fun bigText() {
         val resource = if (step == 0) R.string.setup_welcome_title else R.string.setup_steps_title
         Column(Modifier.padding(bottom = 36.dp)) {
             Text(
                 stringResource(resource, appName),
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.displaySmall, // fork: fits two lines on a phone
                 textAlign = TextAlign.Center,
                 color = titleColor,
             )
@@ -103,30 +112,43 @@ fun WelcomeWizard(
                 )
         }
     }
+    /** fork: a tappable segment with the icon in a tonal circle */
     @Composable
-    fun ColumnScope.Step(step: Int, title: String, instruction: String, actionText: String, icon: Painter, action: () -> Unit) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("1", color = if (step == 1) titleColor else textColorDim)
-            Text("2", color = if (step == 2) titleColor else textColorDim)
-            Text("3", color = if (step == 3) titleColor else textColorDim)
-        }
-        Column(Modifier
-            .background(color = stepBackgroundColor)
-            .padding(16.dp)
-        ) {
-            Text(title)
-            Text(instruction, style = MaterialTheme.typography.bodyLarge.merge(color = textColor))
-        }
-        Spacer(Modifier.height(4.dp))
+    fun ActionRow(index: Int, segments: Int, icon: Painter, text: String, action: () -> Unit) {
         Row(
-            Modifier.clickable { action() }
+            Modifier.fillMaxWidth()
+                .clip(segment(index, segments))
                 .background(color = stepBackgroundColor)
-                .padding(16.dp),
+                .clickable { action() }
+                .heightIn(min = 72.dp)
+                .padding(horizontal = 20.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(icon, null, Modifier.padding(end = 6.dp).size(32.dp), tint = textColor)
-            Text(actionText, Modifier.weight(1f))
+            Icon(icon, null, Modifier.padding(end = 16.dp).size(40.dp).clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer).padding(8.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+            Text(text, Modifier.weight(1f))
         }
+    }
+    @Composable
+    fun ColumnScope.Step(step: Int, title: String, instruction: String, actionText: String, icon: Painter, segments: Int = 2, action: () -> Unit) {
+        // fork: progress as three bars instead of the digits 1 2 3
+        Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            for (i in 1..3)
+                Box(Modifier.weight(1f).height(6.dp).clip(CircleShape)
+                    .background(if (i <= step) titleColor else MaterialTheme.colorScheme.surfaceContainerHighest))
+        }
+        Column(Modifier
+            .fillMaxWidth()
+            .clip(segment(0, segments))
+            .background(color = stepBackgroundColor)
+            .padding(20.dp)
+        ) {
+            Text(title)
+            Text(instruction, style = MaterialTheme.typography.bodyLarge.merge(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                modifier = Modifier.padding(top = 4.dp))
+        }
+        Spacer(Modifier.height(ListItemDefaults.SegmentedGap))
+        ActionRow(1, segments, icon, actionText, action)
     }
     @Composable fun steps() {
         if (step == 0)
@@ -156,23 +178,12 @@ fun WelcomeWizard(
                         stringResource(R.string.setup_step2_instruction, appName),
                         stringResource(R.string.setup_step2_action),
                         painterResource(R.drawable.ic_setup_select),
-                        imm::showInputMethodPicker
+                        segments = 3,
+                        action = imm::showInputMethodPicker
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Row(
-                        Modifier.clickable { close() }
-                            .background(color = stepBackgroundColor)
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.sym_keyboard_language_switch),
-                            null,
-                            Modifier.padding(end = 6.dp).size(32.dp),
-                            tint = textColor
-                        )
-                        Text(stringResource(R.string.setup_step3_action), Modifier.weight(1f))
-                    }
+                    Spacer(Modifier.height(ListItemDefaults.SegmentedGap))
+                    ActionRow(2, 3, painterResource(R.drawable.sym_keyboard_language_switch),
+                        stringResource(R.string.setup_step3_action)) { close() }
                 } else { // step 3
                     Step(
                         step,
@@ -180,33 +191,22 @@ fun WelcomeWizard(
                         stringResource(R.string.setup_step3_instruction, appName),
                         stringResource(R.string.setup_step3_action),
                         painterResource(R.drawable.sym_keyboard_language_switch),
-                        close
+                        segments = 3,
+                        action = close
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Row(
-                        Modifier.clickable { finish() }
-                            .background(color = stepBackgroundColor)
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.ic_setup_check),
-                            null,
-                            Modifier.padding(end = 6.dp).size(32.dp),
-                            tint = textColor
-                        )
-                        Text(stringResource(R.string.setup_finish_action), Modifier.weight(1f))
-                    }
+                    Spacer(Modifier.height(ListItemDefaults.SegmentedGap))
+                    ActionRow(2, 3, painterResource(R.drawable.ic_setup_check),
+                        stringResource(R.string.setup_finish_action)) { finish() }
                 }
             }
     }
-    Surface {
+    Surface(color = MaterialTheme.colorScheme.background) { // fork: same background as the settings
         CompositionLocalProvider(
             LocalContentColor provides textColor,
             LocalTextStyle provides MaterialTheme.typography.titleLarge.merge(color = textColor),
         ) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
+                modifier = Modifier.fillMaxSize().padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (useWideLayout)
@@ -232,15 +232,10 @@ fun WelcomeWizard(
 fun Step0(onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Image(painterResource(R.drawable.setup_welcome_image), null)
-        Row(Modifier.clickable { onClick() }
-            .padding(top = 4.dp, start = 4.dp, end = 4.dp)
-            //.background(color = MaterialTheme.colorScheme.primary)
-        ) {
-            Spacer(Modifier.weight(1f))
-            Text(
-                stringResource(R.string.setup_start_action),
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
+        // fork: a filled button instead of plain text
+        Button(onClick = onClick, modifier = Modifier.padding(top = 24.dp).heightIn(min = 56.dp)) {
+            Text(stringResource(R.string.setup_start_action), style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 16.dp))
         }
     }
 }

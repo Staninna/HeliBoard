@@ -3,6 +3,7 @@
 package helium314.keyboard.keyboard.clipboard
 
 import android.content.Context
+import helium314.keyboard.fork.ForkClipboard
 import android.view.View
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
@@ -49,10 +50,12 @@ class ClipboardLayoutParams(ctx: Context) {
 
     fun setItemProperties(view: View) {
         (view.layoutParams as RecyclerView.LayoutParams).apply {
-            topMargin = keyHorizontalGap / 2
-            bottomMargin = keyVerticalGap / 2
-            marginStart = keyHorizontalGap / 2
-            marginEnd = keyHorizontalGap / 2
+            // fork: the same gap as between the keys, in both directions, so the cards line up with the keys
+            val gap = ForkClipboard.itemGap
+            topMargin = if (gap >= 0) gap / 2 else keyHorizontalGap / 2
+            bottomMargin = if (gap >= 0) gap - gap / 2 else keyVerticalGap / 2
+            marginStart = if (gap >= 0) gap / 2 else keyHorizontalGap / 2
+            marginEnd = if (gap >= 0) gap - gap / 2 else keyHorizontalGap / 2
             view.layoutParams = this
         }
     }

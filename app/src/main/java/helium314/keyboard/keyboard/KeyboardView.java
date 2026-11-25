@@ -16,6 +16,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import helium314.keyboard.fork.ForkPopups;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -432,8 +434,8 @@ public class KeyboardView extends View {
                     paint.setColor(mColors.get(ColorType.ACTION_KEY_ICON));
                 else if (this instanceof EmojiPageKeyboardView)
                     paint.setColor(mColors.get(ColorType.EMOJI_KEY_TEXT));
-                else if (this instanceof PopupKeysKeyboardView)
-                    paint.setColor(mColors.get(ColorType.POPUP_KEY_TEXT));
+                else if (this instanceof PopupKeysKeyboardView) // fork: readable on the selected key
+                    paint.setColor(ForkPopups.popupKeyColor(key, mColors, ColorType.POPUP_KEY_TEXT));
                 else
                     paint.setColor(key.selectTextColor(params));
                 // Set a drop shadow for the text if the shadow radius is positive value.
@@ -646,7 +648,10 @@ public class KeyboardView extends View {
         } else if (key.getBackgroundType() != Key.BACKGROUND_TYPE_NORMAL) {
             mColors.setColor(icon, ColorType.KEY_ICON);
         } else if (this instanceof PopupKeysKeyboardView) {
-            mColors.setColor(icon, ColorType.POPUP_KEY_ICON);
+            if (key.isPressed()) // fork: readable on the selected key
+                icon.setColorFilter(new PorterDuffColorFilter(ForkPopups.popupKeyColor(key, mColors, ColorType.POPUP_KEY_ICON), PorterDuff.Mode.SRC_IN));
+            else
+                mColors.setColor(icon, ColorType.POPUP_KEY_ICON);
         } else if (key.getCode() == Constants.CODE_SPACE || key.getCode() == KeyCode.ZWNJ) {
             // set color of default number pad space bar icon for Holo style, or for zero-width non-joiner (zwnj) on some layouts like nepal
             mColors.setColor(icon, ColorType.KEY_ICON);

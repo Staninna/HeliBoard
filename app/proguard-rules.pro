@@ -12,3 +12,7 @@
 # after upgrading to gradle 8, stack traces contain "unknown source"
 -keepattributes SourceFile,LineNumberTable
 -dontobfuscate
+
+# fork: optional OEM window extensions referenced by androidx.window (pulled in by current Compose)
+-dontwarn androidx.window.extensions.**
+-dontwarn androidx.window.sidecar.**

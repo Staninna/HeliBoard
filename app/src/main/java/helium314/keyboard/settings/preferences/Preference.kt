@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -28,7 +27,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import helium314.keyboard.latin.R
-import helium314.keyboard.settings.IconOrImage
+import helium314.keyboard.fork.ui.ForkUi
+import helium314.keyboard.fork.ui.GroupTitle
+import helium314.keyboard.fork.ui.SettingsIcon
 import helium314.keyboard.latin.utils.Theme
 import helium314.keyboard.latin.utils.previewDark
 
@@ -39,15 +40,7 @@ fun PreferenceCategory(
     title: String,
     modifier: Modifier = Modifier,
 ) {
-    Column {
-        HorizontalDivider()
-        Text(
-            text = title,
-            modifier = modifier.padding(top = 12.dp, start = 16.dp, end = 8.dp, bottom = 8.dp),
-            color = MaterialTheme.colorScheme.secondary,
-            style = MaterialTheme.typography.titleSmall
-        )
-    }
+    GroupTitle(title, modifier) // fork: title above a rounded group, no divider
 }
 
 @Composable
@@ -63,13 +56,14 @@ fun Preference(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .heightIn(min = 44.dp)
-            .padding(vertical = 10.dp, horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            // fork: Expressive list item measures, icons in a tonal container
+            .heightIn(min = 72.dp) // rows with and without a switch get the same height
+            .padding(vertical = 12.dp, horizontal = ForkUi.RowPadding),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null)
-            IconOrImage(icon, name, 32)
+            SettingsIcon(icon, name)
         Column(modifier = Modifier.weight(1f)) {
             Text(text = name, style = MaterialTheme.typography.bodyLarge)
             if (description != null) {

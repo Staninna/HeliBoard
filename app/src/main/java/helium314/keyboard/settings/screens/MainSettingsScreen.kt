@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.settings.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import helium314.keyboard.fork.ui.ForkUi
+import helium314.keyboard.fork.ui.SettingsGroup
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
@@ -52,67 +56,84 @@ fun MainSettingsScreen(
         val enabledSubtypes = SubtypeSettings.getEnabledSubtypes(true)
         Scaffold(contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)) { innerPadding ->
             Column(
-                Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
+                Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding)),
+                verticalArrangement = Arrangement.spacedBy(ForkUi.ScreenPadding) // fork: rounded groups
             ) {
+                Spacer(Modifier)
+                SettingsGroup({
                 Preference(
                     name = stringResource(R.string.language_and_layouts_title),
                     description = enabledSubtypes.joinToString(", ") { it.displayName() },
                     onClick = onClickLanguage,
                     icon = R.drawable.ic_settings_languages
                 ) { NextScreenIcon() }
+                })
+                SettingsGroup({
                 Preference(
                     name = stringResource(R.string.settings_screen_preferences),
                     onClick = onClickPreferences,
                     icon = R.drawable.ic_settings_preferences
                 ) { NextScreenIcon() }
+                }, {
                 Preference(
                     name = stringResource(R.string.settings_screen_appearance),
                     onClick = onClickAppearance,
                     icon = R.drawable.ic_settings_appearance
                 ) { NextScreenIcon() }
+                }, {
                 Preference(
                     name = stringResource(R.string.settings_screen_toolbar),
                     onClick = onClickToolbar,
-                    icon = R.drawable.ic_settings_toolbar
+                    icon = R.drawable.ic_fork_toolbar // fork: a toolbar, not a bare chevron
                 ) { NextScreenIcon() }
-                if (JniUtils.sHaveGestureLib)
+                }, if (JniUtils.sHaveGestureLib) {{
                     Preference(
                         name = stringResource(R.string.settings_screen_gesture),
                         onClick = onClickGestureTyping,
                         icon = R.drawable.ic_settings_gesture
                     ) { NextScreenIcon() }
+                }} else null,
                 // we don't even show the menu if data gathering phase ended more than 2 weeks ago
-                if (JniUtils.sHaveGestureLib && System.currentTimeMillis() < END_DATE_EPOCH_MILLIS + TWO_WEEKS_IN_MILLIS)
+                if (JniUtils.sHaveGestureLib && System.currentTimeMillis() < END_DATE_EPOCH_MILLIS + TWO_WEEKS_IN_MILLIS) {{
                     Preference(
                         name = stringResource(R.string.gesture_data_screen),
                         onClick = onClickDataGathering,
                         icon = R.drawable.ic_settings_gesture
                     ) { NextScreenIcon() }
+                }} else null)
+                SettingsGroup({
                 Preference(
                     name = stringResource(R.string.settings_screen_correction),
                     onClick = onClickTextCorrection,
                     icon = R.drawable.ic_settings_correction
                 ) { NextScreenIcon() }
+                }, {
                 Preference(
                     name = stringResource(R.string.settings_screen_secondary_layouts),
                     onClick = onClickLayouts,
                     icon = R.drawable.ic_settings_layout
                 ) { NextScreenIcon() }
+                }, {
                 Preference(
                     name = stringResource(R.string.dictionary_settings_category),
                     onClick = onClickDictionaries,
                     icon = R.drawable.ic_dictionary
                 ) { NextScreenIcon() }
+                })
+                SettingsGroup({
                 Preference(
                     name = stringResource(R.string.settings_screen_advanced),
                     onClick = onClickAdvanced,
                     icon = R.drawable.ic_settings_advanced
                 ) { NextScreenIcon() }
+                }, {
                 Preference(
                     name = stringResource(R.string.settings_screen_about),
                     onClick = onClickAbout,
                     icon = R.drawable.ic_settings_about
                 ) { NextScreenIcon() }
+                })
+                Spacer(Modifier)
             }
         }
     }

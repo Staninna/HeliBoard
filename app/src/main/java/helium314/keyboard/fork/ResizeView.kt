@@ -55,7 +55,7 @@ class ResizeView(context: Context) : FrameLayout(context) {
         // one row of controls, so the sheet fits even a keyboard at half height
         val controls = LinearLayout(context).apply { gravity = Gravity.CENTER_VERTICAL }
         controls.addView(roundButton(resetIcon(), R.string.fork_resize_reset) { ForkPanels.applyHeightScale(null) })
-        controls.addView(roundButton("−") { step(-STEP) })
+        controls.addView(roundButton("−", R.string.fork_resize_smaller) { step(-STEP) })
         value.apply {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 36f)
             typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
@@ -64,7 +64,7 @@ class ResizeView(context: Context) : FrameLayout(context) {
             minWidth = 104.dp
         }
         controls.addView(value)
-        controls.addView(roundButton("+") { step(STEP) })
+        controls.addView(roundButton("+", R.string.fork_resize_larger) { step(STEP) })
         controls.addView(pillButton(R.string.fork_resize_done) { ForkPanels.close() })
         column.addView(controls)
 
@@ -117,8 +117,9 @@ class ResizeView(context: Context) : FrameLayout(context) {
         ?.also { theme.setColor(it, ColorType.KEY_TEXT) }
 
     /** Round tonal button, 48 dp, with a [symbol]. */
-    private fun roundButton(symbol: String, onClick: () -> Unit) = TextView(context).apply {
+    private fun roundButton(symbol: String, description: Int, onClick: () -> Unit) = TextView(context).apply {
         text = symbol
+        contentDescription = context.getString(description) // screen readers say "Smaller", not "minus"
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
         setTextColor(theme.get(ColorType.KEY_TEXT))
         gravity = Gravity.CENTER
@@ -144,10 +145,12 @@ class ResizeView(context: Context) : FrameLayout(context) {
         setText(text)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
         typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
-        setTextColor(theme.get(ColorType.KEY_TEXT)) // the accent is light in most themes, white text on it is hard to read
+        val accent = theme.get(ColorType.ACTION_KEY_BACKGROUND)
+        // the accent is light in dark themes and dark in some light ones: take the first color that reads on it
+        setTextColor(ForkColors.readableOn(accent, theme.get(ColorType.MAIN_BACKGROUND), theme.get(ColorType.KEY_TEXT)))
         gravity = Gravity.CENTER
         setPadding(20.dp, 0, 20.dp, 0)
-        background = pill(theme.get(ColorType.ACTION_KEY_BACKGROUND))
+        background = pill(accent)
         layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 48.dp)
             .apply { setMargins(4.dp, 0, 4.dp, 0) }
         setOnClickListener { onClick() }

@@ -17,6 +17,7 @@ import helium314.keyboard.event.HapticEvent
 import helium314.keyboard.keyboard.KeyboardActionListener
 import helium314.keyboard.keyboard.KeyboardElement
 import helium314.keyboard.keyboard.KeyboardLayoutSet
+import helium314.keyboard.fork.ForkClipboard
 import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.keyboard.KeyboardTypeface
 import helium314.keyboard.keyboard.MainKeyboardView
@@ -186,6 +187,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
 
         // absurd workaround so Android sets the correct color from stateList (depending on "activated")
         toolbarKeys.forEach { it.isEnabled = false; it.isEnabled = true }
+        ForkClipboard.onStart(this, placeholderView) // fork: empty state and navigation bar padding
     }
 
     fun stopClipboardHistory() {

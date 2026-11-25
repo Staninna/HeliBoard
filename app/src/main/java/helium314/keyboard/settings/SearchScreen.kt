@@ -31,7 +31,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import helium314.keyboard.fork.ui.ForkUi
+import helium314.keyboard.fork.ui.GroupSegment
+import helium314.keyboard.fork.ui.SettingsGroup
+import helium314.keyboard.fork.ui.settingGroups
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -73,18 +86,16 @@ fun SearchSettingsScreen(
                     Column(
                         Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
                     ) {
-                        settings.forEach {
-                            if (it is Int) {
-                                PreferenceCategory(stringResource(it))
-                            } else {
-                                // this only animates appearing prefs
-                                // a solution would be using a list(visible to key)
-                                AnimatedVisibility(visible = it != null) {
-                                    if (it != null)
-                                        SettingsActivity.settingsContainer[it]?.Preference()
-                                }
-                            }
+                        // fork: each category is one rounded card; a null entry is a hidden setting
+                        val groups = settingGroups(settings)
+                        if (groups.firstOrNull()?.first == null) Spacer(Modifier.height(8.dp))
+                        groups.forEach { (title, keys) ->
+                            if (title != null && keys.any { it != null }) PreferenceCategory(stringResource(title))
+                            SettingsGroup(keys.mapIndexed { i, key ->
+                                i to key?.let { k -> SettingsActivity.settingsContainer[k]?.let { s -> @Composable { s.Preference() } } }
+                            })
                         }
+                        Spacer(Modifier.height(ForkUi.ScreenPadding))
                     }
                     // lazyColumn has janky scroll for a while (not sure why compose gets smoother after a while)
                     // maybe related to unnecessary recompositions? but even for just displaying text it's there
@@ -110,7 +121,7 @@ fun SearchSettingsScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun <T: Any?> SearchScreen(
     onClickBack: () -> Unit,
@@ -126,9 +137,11 @@ fun <T: Any?> SearchScreen(
     // keyboard in unexpected situations such as going back from another screen, which is rather annoying
     var searchText by remember { mutableStateOf(TextFieldValue()) }
     var showSearch by remember { mutableStateOf(false) }
+    // fork: large top bar that collapses while scrolling
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top))
     { innerPadding ->
-        Column(Modifier.fillMaxSize().padding(innerPadding)) {
+        Column(Modifier.fillMaxSize().padding(innerPadding).nestedScroll(scrollBehavior.nestedScrollConnection)) {
 
             fun setShowSearch(value: Boolean) {
                 showSearch = value
@@ -139,12 +152,17 @@ fun <T: Any?> SearchScreen(
                 else onClickBack()
             }
             Surface(
-                color = MaterialTheme.colorScheme.surfaceContainer,
+                color = MaterialTheme.colorScheme.background, // fork: the bar is part of the screen
             ) {
                 Column {
-                    TopAppBar(
+                    LargeFlexibleTopAppBar( // fork
                         title = title,
                         windowInsets = WindowInsets(0),
+                        scrollBehavior = scrollBehavior,
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.background,
+                            scrolledContainerColor = MaterialTheme.colorScheme.background,
+                        ),
                         navigationIcon = {
                             BackButton {
                                 if (showSearch) setShowSearch(false)
@@ -184,8 +202,12 @@ fun <T: Any?> SearchScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
+                        // fork: search bar pill without the underline
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
                         )
                     )
                 }
@@ -201,8 +223,11 @@ fun <T: Any?> SearchScreen(
                         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
                     ) { innerPadding ->
                         LazyColumn(contentPadding = innerPadding) {
-                            items(items) {
-                                itemContent(it)
+                            // fork: results as one rounded group
+                            itemsIndexed(items) { i, item ->
+                                Box(Modifier.padding(horizontal = ForkUi.ScreenPadding, vertical = ListItemDefaults.SegmentedGap / 2)) {
+                                    GroupSegment(i, items.size) { itemContent(item) }
+                                }
                             }
                         }
                     }
@@ -240,6 +265,7 @@ fun ExpandableSearchField(
             }) { CloseIcon(android.R.string.cancel) } },
             singleLine = true,
             colors = colors,
+            shape = CircleShape, // fork
             textStyle = contentTextDirectionStyle,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
         )

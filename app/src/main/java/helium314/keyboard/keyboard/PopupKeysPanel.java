@@ -146,6 +146,7 @@ public interface PopupKeysPanel {
     default void showInParent(ViewGroup parentView) {
         removeFromParent();
         parentView.addView(getContainerView());
+        helium314.keyboard.fork.ForkPopups.elevate(getContainerView()); // fork: raised surface with a shadow
     }
 
     /**
