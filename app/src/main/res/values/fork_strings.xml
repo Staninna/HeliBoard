@@ -57,7 +57,7 @@
 
     <!-- Chips at the start of the suggestion bar -->
     <string name="fork_ai_proofread">Proofread</string>
-    <string name="fork_ai_undo">Undo rewrite</string>
+    <string name="fork_ai_undo">Undo</string>
 
     <!-- Local AI settings -->
     <string name="fork_local_ai">Local AI</string>
@@ -84,4 +84,57 @@
     <string name="fork_local_ai_delete">Delete</string>
     <string name="fork_local_ai_move_up">Move up</string>
     <string name="fork_local_ai_move_down">Move down</string>
+
+    <!-- Toolbar keys for translate and GIF search. Names must match ToolbarKey.TRANSLATE and ToolbarKey.GIF -->
+    <string name="translate" tools:keep="@string/translate">Translate</string>
+    <string name="gif" tools:keep="@string/gif">GIFs</string>
+
+    <!-- Translate panel -->
+    <string name="fork_translate_working">Translating…</string>
+    <string name="fork_translate_pick">Pick the language to translate into.</string>
+    <string name="fork_translate_from">From %s</string>
+    <string name="fork_translate_selection">selected text</string>
+    <string name="fork_translate_partial">text around the cursor</string>
+    <string name="fork_translate_empty">Type something first, then tap Translate.</string>
+    <string name="fork_translate_password">Translate is off in password fields.</string>
+    <string name="fork_translate_changed">The text changed while translating. Nothing was replaced.</string>
+    <string name="fork_translate_err_setup">Turn on translate and add your LibreTranslate server in settings.</string>
+    <string name="fork_translate_err_unreachable">Can\'t reach your translate server.</string>
+    <string name="fork_translate_err_key">Your translate server wants a valid API key.</string>
+    <string name="fork_translate_err_busy">Your translate server is busy. Try again in a moment.</string>
+    <string name="fork_translate_err_too_long">This text is too long for your translate server.</string>
+    <string name="fork_translate_err_failed">Translating didn\'t work.</string>
+
+    <!-- GIF panel. KLIPY's terms require "Search KLIPY" as the search placeholder -->
+    <string name="fork_gif">GIF</string>
+    <string name="fork_gif_search_hint" translatable="false">Search KLIPY</string>
+    <string name="fork_gif_none">No GIFs found.</string>
+    <string name="fork_gif_sending">Adding the GIF…</string>
+    <string name="fork_gif_not_supported">This app doesn\'t take GIFs.</string>
+    <string name="fork_gif_err_send">The GIF didn\'t download.</string>
+    <string name="fork_gif_err_setup">Turn on GIF search and add your KLIPY key in settings.</string>
+    <string name="fork_gif_err_key">KLIPY doesn\'t accept this key.</string>
+    <string name="fork_gif_err_unreachable">Can\'t reach KLIPY.</string>
+    <string name="fork_gif_err_busy">This key reached its limit for now. Try again later.</string>
+    <string name="fork_gif_err_failed">GIF search didn\'t work.</string>
+
+    <!-- Settings: translate and GIF search -->
+    <string name="fork_online">Translate and GIFs</string>
+    <string name="fork_online_summary">Off until you turn them on</string>
+    <string name="fork_online_translate">Translate</string>
+    <string name="fork_online_translate_summary">Translate with your own LibreTranslate server. Only the text you translate is sent, when you tap Translate.</string>
+    <string name="fork_online_server">Server address</string>
+    <string name="fork_online_translate_key">API key (if your server asks for one)</string>
+    <string name="fork_online_translate_ok">Connected. %d languages.</string>
+    <string name="fork_online_gifs">GIF search</string>
+    <string name="fork_online_gifs_summary">Search GIFs from KLIPY. KLIPY sees what you search and your IP address, nothing else.</string>
+    <string name="fork_online_gifs_key_help">KLIPY needs a key. It\'s free: create an account, add an app, and paste its key here. A test key allows 100 searches an hour.</string>
+    <string name="fork_online_gifs_key">KLIPY key</string>
+    <string name="fork_online_gifs_get_key">Get a key</string>
+    <string name="fork_online_gifs_ok">Works.</string>
+    <string name="fork_online_check">Check</string>
+    <string name="fork_online_checking">Checking…</string>
+    <string name="fork_online_err_address">Enter an https address.</string>
+    <string name="fork_online_err_not_libretranslate">That address doesn\'t answer like a LibreTranslate server.</string>
+    <string name="fork_online_footer">Both use https only, and only send something when you use them. Keys stay on this phone, outside backups and the settings export.</string>
 </resources>

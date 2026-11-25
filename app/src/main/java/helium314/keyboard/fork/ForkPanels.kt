@@ -51,6 +51,16 @@ object ForkPanels {
         show(helium314.keyboard.fork.ai.RewriteView(context, prompt), context.getString(R.string.rewrite))
     }
 
+    fun showTranslate() {
+        val context = KeyboardSwitcher.getInstance().wrapperView?.context ?: return
+        show(helium314.keyboard.fork.online.TranslateView(context), context.getString(R.string.translate))
+    }
+
+    fun showGifs(query: String = "") {
+        val context = KeyboardSwitcher.getInstance().wrapperView?.context ?: return
+        show(helium314.keyboard.fork.online.GifView(context, query), context.getString(R.string.gif))
+    }
+
     /** The toolbar's grid button. Returns false when the grid can't open, so upstream's toggle runs instead. */
     fun toggleToolsGrid(strip: SuggestionStripView): Boolean {
         if (isToolsGridOpen) {

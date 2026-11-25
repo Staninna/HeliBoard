@@ -79,6 +79,7 @@ fun SettingsNavHost(
                 onClickLayouts = { navController.navigate(SettingsDestination.Layouts) },
                 onClickDictionaries = { navController.navigate(SettingsDestination.Dictionaries) },
                 onClickLocalAi = { navController.navigate(SettingsDestination.LocalAi) }, // fork
+                onClickOnline = { navController.navigate(SettingsDestination.Online) }, // fork
                 onClickBack = ::goBack,
             )
         }
@@ -143,6 +144,9 @@ fun SettingsNavHost(
         composable(SettingsDestination.LocalAi) { // fork
             helium314.keyboard.fork.ai.LocalAiScreen(onClickBack = ::goBack)
         }
+        composable(SettingsDestination.Online) { // fork
+            helium314.keyboard.fork.online.OnlineScreen(onClickBack = ::goBack)
+        }
     }
     if (target.value != SettingsDestination.Settings/* && target.value != navController.currentBackStackEntry?.destination?.route*/)
         navController.navigate(route = target.value)
@@ -169,6 +173,7 @@ object SettingsDestination {
     const val Layouts = "layouts"
     const val Dictionaries = "dictionaries"
     const val LocalAi = "fork_local_ai" // fork
+    const val Online = "fork_online" // fork
     val navTarget = MutableStateFlow(Settings)
 
     private val navScope = CoroutineScope(Dispatchers.Default)

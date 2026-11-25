@@ -22,9 +22,12 @@ object ForkKeys {
 
     @JvmStatic
     fun onCodeInput(code: Int): Boolean {
+        if (helium314.keyboard.fork.online.GifSearch.onCode(code)) return true // the keys type the GIF search
         if (code != KeyCode.FORK_REWRITE) helium314.keyboard.fork.ai.ForkAi.onKey() // typing on ends undo and proofread offers
         when (code) {
             KeyCode.FORK_REWRITE -> helium314.keyboard.fork.ai.ForkAi.openRewrite()
+            KeyCode.FORK_TRANSLATE -> ForkPanels.showTranslate()
+            KeyCode.FORK_GIFS -> ForkPanels.showGifs()
             KeyCode.FORK_RESIZE -> ForkPanels.showResize()
             KeyCode.FORK_SELECT_MODE -> setSelectMode(!selectMode)
             KeyCode.FORK_KAOMOJI_TAB -> ForkEmoji.showKaomoji(true)

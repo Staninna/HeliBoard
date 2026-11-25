@@ -38,8 +38,10 @@ ground rules below are enough to work safely.
 - **Fork code lives in `helium314.keyboard.fork.*`** and in new files. Upstream files get small
   hooks marked `// fork:`, so upstream syncs stay easy to merge.
 - **Every network request goes through the fork's network gate.** The app has the INTERNET
-  permission only for opt-in features: SmolChat on 127.0.0.1, LibreTranslate, and GIF providers.
-  The gate checks the feature toggle, the host and the scheme. Cleartext goes only to 127.0.0.1.
+  permission only for opt-in features: SmolChat on 127.0.0.1, the user's LibreTranslate server,
+  and KLIPY for GIFs (`fork/online/`). The gate checks the feature toggle, the host and the scheme.
+  Cleartext goes only to 127.0.0.1; GIF requests only to klipy.com. KLIPY's terms require "Search
+  KLIPY" as the search placeholder and loading media straight from the URLs it returns.
 - **Test on the emulator, never on a physical phone.**
 - **Verify before committing:** build the debug variant and run the unit tests. Before pushing,
   also build `:app:assembleRelease`: R8 problems only show up in the minified build.

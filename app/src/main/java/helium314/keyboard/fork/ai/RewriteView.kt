@@ -213,7 +213,7 @@ class RewriteView(context: Context, firstPrompt: RewritePrompts.Prompt?) : Frame
             SmolChat.Problem.NO_MODEL, SmolChat.Problem.NOT_RUNNING -> R.string.fork_ai_action_open to SmolChat.launchIntent(context)
             else -> 0 to null
         }
-        card.showMessage(text, label, intent?.let { { ForkPanels.close(); runCatching { context.startActivity(it) }; Unit } })
+        card.showMessage(text, label, onAction = intent?.let { { ForkPanels.close(); runCatching { context.startActivity(it) }; Unit } })
         setButtons(working = false)
         retry.isVisible = problem != SmolChat.Problem.NOT_INSTALLED && problem != SmolChat.Problem.NOT_PAIRED && problem != SmolChat.Problem.TOO_LONG
     }

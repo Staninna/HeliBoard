@@ -16,13 +16,16 @@ object NetworkGate {
         LOCAL_AI,
         /** LibreTranslate at the user's own address: https only. */
         TRANSLATE,
-        /** GIF search: https only. */
+        /** GIF search with KLIPY: https to klipy.com only. */
         GIFS,
     }
 
     class Refused(message: String) : IOException(message)
 
     const val LOOPBACK = "127.0.0.1"
+
+    /** KLIPY: the API and the media both live under this domain. */
+    const val GIF_HOST = "klipy.com"
 
     /** Checks [url] for [feature] and returns it parsed, or throws [Refused]. */
     fun check(feature: Feature, url: String, enabled: Boolean): URL {
@@ -37,7 +40,9 @@ object NetworkGate {
         if (!parsed.userInfo.isNullOrEmpty()) throw Refused("credentials in the URL")
         when (feature) {
             Feature.LOCAL_AI -> if (scheme != "http" || host != LOOPBACK) throw Refused("local AI is 127.0.0.1 only")
-            Feature.TRANSLATE, Feature.GIFS -> if (scheme != "https") throw Refused("$feature needs https")
+            Feature.TRANSLATE -> if (scheme != "https") throw Refused("$feature needs https")
+            Feature.GIFS -> if (scheme != "https" || !(host == GIF_HOST || host.endsWith(".$GIF_HOST")))
+                throw Refused("GIF search is https to $GIF_HOST only")
         }
         return parsed
     }

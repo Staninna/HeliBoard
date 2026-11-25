@@ -48,6 +48,7 @@ fun MainSettingsScreen(
     onClickDictionaries: () -> Unit,
     onClickBack: () -> Unit,
     onClickLocalAi: () -> Unit = {}, // fork
+    onClickOnline: () -> Unit = {}, // fork
 ) {
     SearchSettingsScreen(
         onClickBack = onClickBack,
@@ -126,6 +127,13 @@ fun MainSettingsScreen(
                     description = stringResource(R.string.fork_local_ai_summary),
                     onClick = onClickLocalAi,
                     icon = R.drawable.ic_fork_rewrite
+                ) { NextScreenIcon() }
+                }, {
+                Preference( // fork: translate and GIF search, both off until turned on
+                    name = stringResource(R.string.fork_online),
+                    description = stringResource(R.string.fork_online_summary),
+                    onClick = onClickOnline,
+                    icon = R.drawable.ic_fork_translate
                 ) { NextScreenIcon() }
                 })
                 SettingsGroup({

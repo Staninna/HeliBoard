@@ -191,6 +191,8 @@ object KeyCode {
     const val FORK_KAOMOJI_TAB =          -19003
     const val FORK_EMOJI_TAB =            -19004
     const val FORK_REWRITE =              -19005
+    const val FORK_TRANSLATE =            -19006
+    const val FORK_GIFS =                 -19007
 
     // Valid in popups and for toolbar key long press only
     const val KEY_REPEAT =                -11000
@@ -219,7 +221,7 @@ object KeyCode {
         TIMESTAMP, CTRL_LEFT, CTRL_RIGHT, ALT_LEFT, ALT_RIGHT, META_LEFT, META_RIGHT, SEND_INTENT_ONE, SEND_INTENT_TWO,
         SEND_INTENT_THREE, EMOJI_SEARCH, INLINE_EMOJI_SEARCH_DONE, META_LOCK,
         BACKGROUND_GATHERING, BACKGROUND_GATHERING_TEMP_OFF, DPAD,
-        FORK_RESIZE, FORK_SELECT_MODE, FORK_KAOMOJI_TAB, FORK_EMOJI_TAB, FORK_REWRITE, // fork
+        FORK_RESIZE, FORK_SELECT_MODE, FORK_KAOMOJI_TAB, FORK_EMOJI_TAB, FORK_REWRITE, FORK_TRANSLATE, FORK_GIFS, // fork
         -> this
 
         KEY_REPEAT if (longPress) -> this

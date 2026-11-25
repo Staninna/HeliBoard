@@ -31,4 +31,14 @@ class NetworkGateTest {
         assertFailsWith<NetworkGate.Refused> { NetworkGate.check(Feature.GIFS, "http://127.0.0.1/gifs", true) }
         assertFailsWith<NetworkGate.Refused> { NetworkGate.check(Feature.GIFS, "not a url", true) }
     }
+
+    @Test fun gifsOnlyGoToKlipy() {
+        NetworkGate.check(Feature.GIFS, "https://api.klipy.com/api/v1/key/gifs/search?q=hi", true)
+        NetworkGate.check(Feature.GIFS, "https://static.klipy.com/ii/abc/14/af/um0", true)
+        for (url in listOf(
+            "https://klipy.com.example/gifs",
+            "https://evilklipy.com/gifs",
+            "https://media.giphy.com/x.gif",
+        )) assertFailsWith<NetworkGate.Refused>(url) { NetworkGate.check(Feature.GIFS, url, true) }
+    }
 }

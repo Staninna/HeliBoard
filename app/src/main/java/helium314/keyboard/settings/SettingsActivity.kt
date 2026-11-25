@@ -247,8 +247,10 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
 
         // fork: deep link into one settings screen
         private const val EXTRA_FORK_SCREEN = "fork_screen"
-        fun localAiIntent(context: Context): Intent = Intent(context, SettingsActivity::class.java)
-            .putExtra(EXTRA_FORK_SCREEN, SettingsDestination.LocalAi)
+        fun localAiIntent(context: Context): Intent = forkScreenIntent(context, SettingsDestination.LocalAi)
+        fun onlineIntent(context: Context): Intent = forkScreenIntent(context, SettingsDestination.Online)
+        private fun forkScreenIntent(context: Context, screen: String) = Intent(context, SettingsActivity::class.java)
+            .putExtra(EXTRA_FORK_SCREEN, screen)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
 

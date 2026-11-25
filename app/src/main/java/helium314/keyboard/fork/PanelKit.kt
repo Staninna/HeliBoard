@@ -172,8 +172,9 @@ class PanelCard(context: Context) : FrameLayout(context) {
         show(progress)
     }
 
-    /** A problem, and optionally the one button that fixes it. */
-    fun showMessage(@StringRes status: Int, @StringRes action: Int = 0, onAction: (() -> Unit)? = null) {
+    /** A problem, and optionally the one button that fixes it. Without [icon], a plain hint. */
+    fun showMessage(@StringRes status: Int, @StringRes action: Int = 0, icon: Boolean = true, onAction: (() -> Unit)? = null) {
+        messageIcon.isVisible = icon
         messageText.setText(status)
         messageAction.isVisible = action != 0 && onAction != null
         if (action != 0) messageAction.setText(action)

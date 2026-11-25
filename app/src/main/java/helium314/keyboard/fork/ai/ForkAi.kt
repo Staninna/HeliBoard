@@ -48,6 +48,7 @@ object ForkAi {
     @JvmStatic
     fun onFinishInputView() {
         clearChip()
+        helium314.keyboard.fork.online.GifSearch.end() // a search left open would swallow typing in the next field
     }
 
     /** Every key press: the user typed on, so undo and proofread are no longer offered. */
@@ -117,14 +118,22 @@ object ForkAi {
 
     /** Passwords and fields that ask not to learn from what is typed, and incognito mode. */
     fun isPrivate(info: EditorInfo): Boolean {
+        val noLearning = info.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING != 0
+        return isPassword(info) || noLearning || Settings.getValues().mIncognitoModeEnabled
+    }
+
+    /** The current field takes a password. Nothing from it ever leaves the keyboard. */
+    fun isPassword(info: EditorInfo? = editorInfo): Boolean {
+        info ?: return false
         val variation = info.inputType and InputType.TYPE_MASK_VARIATION
         val cls = info.inputType and InputType.TYPE_MASK_CLASS
-        val password = (cls == InputType.TYPE_CLASS_TEXT && variation in setOf(
+        return (cls == InputType.TYPE_CLASS_TEXT && variation in setOf(
             InputType.TYPE_TEXT_VARIATION_PASSWORD, InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD, InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
         )) || (cls == InputType.TYPE_CLASS_NUMBER && variation == InputType.TYPE_NUMBER_VARIATION_PASSWORD)
-        val noLearning = info.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING != 0
-        return password || noLearning || Settings.getValues().mIncognitoModeEnabled
     }
+
+    /** The field's editor info, for content the keyboard sends (GIFs). */
+    val currentEditorInfo: EditorInfo? get() = editorInfo
 
     fun context(): Context? = ime.get()
 }

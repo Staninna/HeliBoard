@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
     <uses-permission android:name="android.permission.WRITE_USER_DICTIONARY" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <!-- fork: only for opt-in features, and only through fork/net/NetworkGate.kt: SmolChat Server
-         on 127.0.0.1, and later translate and GIF search -->
+         on 127.0.0.1, translate with the user's LibreTranslate server, GIF search with KLIPY -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application android:label="@string/english_ime_name"
@@ -126,6 +126,17 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/gesture_data_path"/>
+        </provider>
+
+        <!-- fork: hands the GIF being sent to the app, see fork/online/GifView.kt -->
+        <provider android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fork.gifs"
+            android:enabled="true"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fork_gif_provider_path"/>
         </provider>
     </application>
 

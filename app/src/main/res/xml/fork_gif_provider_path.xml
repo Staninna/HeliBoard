@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- fork: only the GIF being sent, see fork/online/GifView.kt -->
+<paths>
+    <cache-path
+        name="fork_gifs"
+        path="fork_gifs/"/>
+</paths>

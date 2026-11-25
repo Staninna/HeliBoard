@@ -155,7 +155,10 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         metaAfterCodeInput(primaryCode)
     }
 
-    override fun onTextInput(text: String?) = latinIME.onTextInput(text)
+    override fun onTextInput(text: String?) {
+        if (helium314.keyboard.fork.online.GifSearch.onText(text)) return // fork: the keys type the GIF search
+        latinIME.onTextInput(text)
+    }
 
     override fun onContent(content: InputContentInfoCompat) {
         val editorInfo = latinIME.currentInputEditorInfo
@@ -167,11 +170,12 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         }
     }
 
-    override fun onStartBatchInput() = latinIME.onStartBatchInput()
+    // fork: no gesture typing into the app while the keys type the GIF search
+    override fun onStartBatchInput() { if (!helium314.keyboard.fork.online.GifSearch.isActive) latinIME.onStartBatchInput() }
 
-    override fun onUpdateBatchInput(batchPointers: InputPointers?) = latinIME.onUpdateBatchInput(batchPointers)
+    override fun onUpdateBatchInput(batchPointers: InputPointers?) { if (!helium314.keyboard.fork.online.GifSearch.isActive) latinIME.onUpdateBatchInput(batchPointers) }
 
-    override fun onEndBatchInput(batchPointers: InputPointers?) = latinIME.onEndBatchInput(batchPointers)
+    override fun onEndBatchInput(batchPointers: InputPointers?) { if (!helium314.keyboard.fork.online.GifSearch.isActive) latinIME.onEndBatchInput(batchPointers) }
 
     override fun onCancelBatchInput() = latinIME.onCancelBatchInput()
 
