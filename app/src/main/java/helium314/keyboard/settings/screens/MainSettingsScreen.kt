@@ -47,6 +47,7 @@ fun MainSettingsScreen(
     onClickLayouts: () -> Unit,
     onClickDictionaries: () -> Unit,
     onClickBack: () -> Unit,
+    onClickLocalAi: () -> Unit = {}, // fork
 ) {
     SearchSettingsScreen(
         onClickBack = onClickBack,
@@ -118,6 +119,13 @@ fun MainSettingsScreen(
                     name = stringResource(R.string.dictionary_settings_category),
                     onClick = onClickDictionaries,
                     icon = R.drawable.ic_dictionary
+                ) { NextScreenIcon() }
+                }, {
+                Preference( // fork: rewrite and proofread with SmolChat Server
+                    name = stringResource(R.string.fork_local_ai),
+                    description = stringResource(R.string.fork_local_ai_summary),
+                    onClick = onClickLocalAi,
+                    icon = R.drawable.ic_fork_rewrite
                 ) { NextScreenIcon() }
                 })
                 SettingsGroup({

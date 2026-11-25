@@ -29,4 +29,59 @@
     <string name="fork_resize_smaller">Smaller</string>
     <string name="fork_resize_larger">Larger</string>
     <string name="fork_clipboard_empty">Text you copy shows up here.\nLong-press a clip to pin it.</string>
+    <!-- Toolbar key that rewrites text with the local AI. Name must match ToolbarKey.REWRITE -->
+    <string name="rewrite" tools:keep="@string/rewrite">Rewrite</string>
+
+    <!-- Rewrite panel -->
+    <string name="fork_ai_starting">Starting SmolChat…</string>
+    <string name="fork_ai_loading">Loading the model…</string>
+    <string name="fork_ai_reading">Reading your text…</string>
+    <string name="fork_ai_partial">Rewriting only the text around the cursor</string>
+    <string name="fork_ai_selection">Rewriting the selected text</string>
+    <string name="fork_ai_empty">Type something first, then tap Rewrite.</string>
+    <string name="fork_ai_accept">Replace</string>
+    <string name="fork_ai_retry">Retry</string>
+    <string name="fork_ai_cancel">Cancel</string>
+    <string name="fork_ai_changed">The text changed while SmolChat was working. Nothing was replaced.</string>
+    <string name="fork_ai_err_not_installed">Rewrite needs SmolChat Server, the AI that runs on this phone.</string>
+    <string name="fork_ai_err_not_paired">Pair HeliBoard with SmolChat Server to rewrite text.</string>
+    <string name="fork_ai_err_no_model">SmolChat Server has no model yet.</string>
+    <string name="fork_ai_err_not_running">SmolChat Server could not start.</string>
+    <string name="fork_ai_err_busy">SmolChat Server is busy with other requests.</string>
+    <string name="fork_ai_err_too_long">This text is too long for the model.</string>
+    <string name="fork_ai_err_failed">SmolChat could not finish.</string>
+    <string name="fork_ai_err_timeout">SmolChat took too long to answer.</string>
+    <string name="fork_ai_action_get">Get SmolChat Server</string>
+    <string name="fork_ai_action_pair">Open settings</string>
+    <string name="fork_ai_action_open">Open SmolChat Server</string>
+
+    <!-- Chips at the start of the suggestion bar -->
+    <string name="fork_ai_proofread">Proofread</string>
+    <string name="fork_ai_undo">Undo rewrite</string>
+
+    <!-- Local AI settings -->
+    <string name="fork_local_ai">Local AI</string>
+    <string name="fork_local_ai_summary">Rewrite and proofread with SmolChat Server on this phone</string>
+    <string name="fork_local_ai_status_paired">Paired with SmolChat Server</string>
+    <string name="fork_local_ai_status_paired_body">Text goes only to the model on this phone, never to the internet.</string>
+    <string name="fork_local_ai_status_unpaired">Not paired</string>
+    <string name="fork_local_ai_status_unpaired_body">Pair to rewrite and proofread with the model on this phone. Nothing leaves the device.</string>
+    <string name="fork_local_ai_status_missing">SmolChat Server is not installed</string>
+    <string name="fork_local_ai_status_missing_body">Rewrite and proofread use SmolChat Server, a separate app that runs a language model on this phone.</string>
+    <string name="fork_local_ai_pair">Pair</string>
+    <string name="fork_local_ai_pair_again">Pair again</string>
+    <string name="fork_local_ai_unpair">Forget pairing</string>
+    <string name="fork_local_ai_pair_failed">Pairing was not allowed</string>
+    <string name="fork_local_ai_proofread">Proofread chip</string>
+    <string name="fork_local_ai_proofread_summary">Offer a proofread after you stop typing. Never in password or incognito fields.</string>
+    <string name="fork_local_ai_presets">Built in</string>
+    <string name="fork_local_ai_custom">Your prompts</string>
+    <string name="fork_local_ai_add">Add a prompt</string>
+    <string name="fork_local_ai_edit">Edit prompt</string>
+    <string name="fork_local_ai_name">Name</string>
+    <string name="fork_local_ai_instruction">What should it do?</string>
+    <string name="fork_local_ai_instruction_hint">For example: Turn it into a short list.</string>
+    <string name="fork_local_ai_delete">Delete</string>
+    <string name="fork_local_ai_move_up">Move up</string>
+    <string name="fork_local_ai_move_down">Move down</string>
 </resources>

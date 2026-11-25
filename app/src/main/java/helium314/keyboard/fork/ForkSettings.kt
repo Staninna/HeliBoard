@@ -6,4 +6,8 @@ object ForkSettings {
     /** Show the voice input key. Off for people who dictate with another app, like a floating bubble. */
     const val PREF_VOICE_KEY = "fork_voice_key"
     const val DEFAULT_VOICE_KEY = true
+
+    /** Offer the proofread chip after typing (only while paired with SmolChat Server). */
+    const val PREF_PROOFREAD_CHIP = "fork_proofread_chip"
+    const val DEFAULT_PROOFREAD_CHIP = true
 }

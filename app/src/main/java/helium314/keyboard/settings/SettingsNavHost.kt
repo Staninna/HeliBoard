@@ -78,6 +78,7 @@ fun SettingsNavHost(
                 onClickLanguage = { navController.navigate(SettingsDestination.Languages) },
                 onClickLayouts = { navController.navigate(SettingsDestination.Layouts) },
                 onClickDictionaries = { navController.navigate(SettingsDestination.Dictionaries) },
+                onClickLocalAi = { navController.navigate(SettingsDestination.LocalAi) }, // fork
                 onClickBack = ::goBack,
             )
         }
@@ -139,6 +140,9 @@ fun SettingsNavHost(
         composable(SettingsDestination.Subtype + "{subtype}") {
             SubtypeScreen(initialSubtype = it.arguments?.getString("subtype")!!.toSettingsSubtype(), onClickBack = ::goBack)
         }
+        composable(SettingsDestination.LocalAi) { // fork
+            helium314.keyboard.fork.ai.LocalAiScreen(onClickBack = ::goBack)
+        }
     }
     if (target.value != SettingsDestination.Settings/* && target.value != navController.currentBackStackEntry?.destination?.route*/)
         navController.navigate(route = target.value)
@@ -164,6 +168,7 @@ object SettingsDestination {
     const val Subtype = "subtype/"
     const val Layouts = "layouts"
     const val Dictionaries = "dictionaries"
+    const val LocalAi = "fork_local_ai" // fork
     val navTarget = MutableStateFlow(Settings)
 
     private val navScope = CoroutineScope(Dispatchers.Default)

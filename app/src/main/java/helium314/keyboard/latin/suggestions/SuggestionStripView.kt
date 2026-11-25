@@ -141,6 +141,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         colors.setBackground(toolbarExpandKey, ColorType.STRIP_BACKGROUND) // necessary because background is re-used for defaultToolbarBackground
         colors.setColor(toolbarExpandKey, ColorType.TOOL_BAR_EXPAND_KEY)
         colors.setColor(toolbarExpandKey.background, ColorType.TOOL_BAR_EXPAND_KEY_BACKGROUND)
+        helium314.keyboard.fork.ai.AiChip.attach(findViewById(R.id.suggestions_strip_wrapper), toolbarExpandKey) // fork: proofread and undo chip
 
         // background indicator for pinned keys
         val color = colors.get(ColorType.TOOL_BAR_KEY_ENABLED_BACKGROUND) or -0x1000000 // ignore alpha (in Java this is more readable 0xFF000000)

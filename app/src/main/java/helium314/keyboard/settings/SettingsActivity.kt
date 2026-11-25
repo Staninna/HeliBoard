@@ -95,6 +95,8 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
             jobs.add(lifecycleScope.launch(Dispatchers.Default) { KeyboardIconsSet.instance.loadIcons(ctx) }) // otherwise we may crash when displaying toolbar keys
 
         val spellchecker = intent?.getBooleanExtra("spellchecker", false) ?: false
+        // fork: open straight to one screen, for example Local AI from the keyboard's rewrite panel
+        val forkScreen = intent?.getStringExtra(EXTRA_FORK_SCREEN)
 
         val cv = runBlocking { cvDeferred.await() }
         runBlocking { jobs.joinAll() }
@@ -127,7 +129,7 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
                     else if (showWelcomeWizard) {
                         WelcomeWizard(close = { showWelcomeWizard = false }, finish = this::finish)
                     } else {
-                        SettingsNavHost(onClickBack = { this.finish() })
+                        SettingsNavHost(onClickBack = { this.finish() }, startDestination = forkScreen) // fork: deep link
                         if (crashReports.isNotEmpty()) {
                             val ctx = LocalContext.current
                             ConfirmationDialog(
@@ -242,6 +244,12 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
 
         var forceNight: Boolean? = null
         var forceTheme: String? = null
+
+        // fork: deep link into one settings screen
+        private const val EXTRA_FORK_SCREEN = "fork_screen"
+        fun localAiIntent(context: Context): Intent = Intent(context, SettingsActivity::class.java)
+            .putExtra(EXTRA_FORK_SCREEN, SettingsDestination.LocalAi)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
 
     override fun onSharedPreferenceChanged(prefereces: SharedPreferences?, key: String?) {

@@ -22,7 +22,9 @@ object ForkKeys {
 
     @JvmStatic
     fun onCodeInput(code: Int): Boolean {
+        if (code != KeyCode.FORK_REWRITE) helium314.keyboard.fork.ai.ForkAi.onKey() // typing on ends undo and proofread offers
         when (code) {
+            KeyCode.FORK_REWRITE -> helium314.keyboard.fork.ai.ForkAi.openRewrite()
             KeyCode.FORK_RESIZE -> ForkPanels.showResize()
             KeyCode.FORK_SELECT_MODE -> setSelectMode(!selectMode)
             KeyCode.FORK_KAOMOJI_TAB -> ForkEmoji.showKaomoji(true)

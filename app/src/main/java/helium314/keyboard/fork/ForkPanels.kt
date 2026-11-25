@@ -35,6 +35,11 @@ object ForkPanels {
     private var reopenResize = false
 
     val isToolsGridOpen get() = overlay is ToolsGridView
+    val isOpen get() = overlay != null
+
+    fun showRewrite(prompt: helium314.keyboard.fork.ai.RewritePrompts.Prompt?) {
+        show(helium314.keyboard.fork.ai.RewriteView(KeyboardSwitcher.getInstance().wrapperView?.context ?: return, prompt))
+    }
 
     /** The toolbar's grid button. Returns false when the grid can't open, so upstream's toggle runs instead. */
     fun toggleToolsGrid(strip: SuggestionStripView): Boolean {
@@ -119,6 +124,7 @@ object ForkPanels {
 
     private fun show(view: View): Boolean {
         close()
+        helium314.keyboard.fork.ai.ForkAi.onKey() // a panel covers the keys: no proofread or undo offer behind it
         val switcher = KeyboardSwitcher.getInstance()
         val wrapper = switcher.wrapperView ?: return false
         val keyboard = switcher.visibleKeyboardView ?: return false

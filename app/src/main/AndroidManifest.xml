@@ -13,6 +13,9 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_USER_DICTIONARY" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- fork: only for opt-in features, and only through fork/net/NetworkGate.kt: SmolChat Server
+         on 127.0.0.1, and later translate and GIF search -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application android:label="@string/english_ime_name"
             android:name="helium314.keyboard.latin.App"
@@ -24,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
             android:directBootAware="true"
             android:enableOnBackInvokedCallback="true"
             android:localeConfig="@xml/locales_config"
+            android:networkSecurityConfig="@xml/fork_network_security_config"
             tools:remove="android:appComponentFactory"
             tools:targetApi="33">
 
@@ -126,6 +130,8 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
     </application>
 
     <queries>
+        <!-- fork: SmolChat Server, for pairing and waking it -->
+        <package android:name="io.shubham0204.smollmandroid" />
         <!-- To detect other IMEs -->
         <intent>
             <!-- changed to * as it's supposed to help with finding other keyboard apps, see https://github.com/HeliBorg/HeliBoard/issues/1340 -->

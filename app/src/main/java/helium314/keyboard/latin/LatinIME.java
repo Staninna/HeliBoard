@@ -486,6 +486,7 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onCreate() {
+        helium314.keyboard.fork.ai.ForkAi.onCreate(this); // fork: rewrite and proofread
         mSettings.startListener();
         KeyboardIconsSet.Companion.getInstance().loadIcons(this);
         mRichImm = RichInputMethodManager.getInstance();
@@ -703,11 +704,13 @@ public class LatinIME extends InputMethodService implements
     public void onStartInputView(final EditorInfo editorInfo, final boolean restarting) {
         mHandler.onStartInputView(editorInfo, restarting);
         mStatsUtilsManager.onStartInputView();
+        helium314.keyboard.fork.ai.ForkAi.onStartInputView(editorInfo); // fork
     }
 
     @Override
     public void onFinishInputView(final boolean finishingInput) {
         StatsUtils.onFinishInputView();
+        helium314.keyboard.fork.ai.ForkAi.onFinishInputView(); // fork
         mHandler.onFinishInputView(finishingInput);
         mStatsUtilsManager.onFinishInputView();
         mGestureConsumer = GestureConsumer.NULL_GESTURE_CONSUMER;
@@ -964,6 +967,7 @@ public class LatinIME extends InputMethodService implements
     public void onUpdateSelection(int oldSelStart, int oldSelEnd, int newSelStart, int newSelEnd,
                                   int composingSpanStart, int composingSpanEnd) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, composingSpanStart, composingSpanEnd);
+        helium314.keyboard.fork.ai.ForkAi.onUpdateSelection(); // fork: proofread after a pause
         if (DebugFlags.DEBUG_ENABLED) {
             Log.i(TAG, "onUpdateSelection: oss=" + oldSelStart + ", ose=" + oldSelEnd
                     + ", nss=" + newSelStart + ", nse=" + newSelEnd

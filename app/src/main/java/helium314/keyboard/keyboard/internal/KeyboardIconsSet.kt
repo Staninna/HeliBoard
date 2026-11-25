@@ -158,6 +158,7 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.SPLIT -> R.drawable.ic_ime_switcher
                     ToolbarKey.BACKGROUND_GATHERING -> R.drawable.ic_settings_gesture
                     ToolbarKey.RESIZE -> R.drawable.ic_fork_height // fork
+                    ToolbarKey.REWRITE -> R.drawable.ic_fork_rewrite // fork
                 })
             }
         } }
@@ -223,6 +224,7 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.SPLIT -> R.drawable.ic_ime_switcher
                     ToolbarKey.BACKGROUND_GATHERING -> R.drawable.ic_settings_gesture
                     ToolbarKey.RESIZE -> R.drawable.ic_fork_height // fork
+                    ToolbarKey.REWRITE -> R.drawable.ic_fork_rewrite // fork
                 })
             }
         } }
@@ -288,6 +290,7 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.SPLIT -> R.drawable.ic_ime_switcher
                     ToolbarKey.BACKGROUND_GATHERING -> R.drawable.ic_settings_gesture
                     ToolbarKey.RESIZE -> R.drawable.ic_fork_height // fork
+                    ToolbarKey.REWRITE -> R.drawable.ic_fork_rewrite // fork
                 })
             }
         } }
