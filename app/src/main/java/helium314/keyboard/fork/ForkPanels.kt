@@ -2,9 +2,18 @@
 package helium314.keyboard.fork
 
 import android.content.ClipData
+import android.graphics.Typeface
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
+import helium314.keyboard.latin.R
+import helium314.keyboard.latin.common.ColorType
+import helium314.keyboard.latin.utils.dpToPx
 import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
@@ -38,7 +47,8 @@ object ForkPanels {
     val isOpen get() = overlay != null
 
     fun showRewrite(prompt: helium314.keyboard.fork.ai.RewritePrompts.Prompt?) {
-        show(helium314.keyboard.fork.ai.RewriteView(KeyboardSwitcher.getInstance().wrapperView?.context ?: return, prompt))
+        val context = KeyboardSwitcher.getInstance().wrapperView?.context ?: return
+        show(helium314.keyboard.fork.ai.RewriteView(context, prompt), context.getString(R.string.rewrite))
     }
 
     /** The toolbar's grid button. Returns false when the grid can't open, so upstream's toggle runs instead. */
@@ -65,6 +75,7 @@ object ForkPanels {
     @JvmStatic
     fun close() {
         ForkKeys.setSelectMode(false)
+        hideTitleBar()
         val view = overlay ?: return
         overlay = null
         (view.parent as? ViewGroup)?.removeView(view)
@@ -80,6 +91,7 @@ object ForkPanels {
     fun onInputViewCreated(wrapper: KeyboardWrapperView) {
         overlay = null
         strip = null
+        titleBar = null // the strip container was rebuilt with the input view
         if (!reopenResize) return
         reopenResize = false
         wrapper.doOnLayout { wrapper.post { showResize() } }
@@ -122,17 +134,61 @@ object ForkPanels {
         KeyboardSwitcher.getInstance().setThemeNeedsReload()
     }
 
-    private fun show(view: View): Boolean {
+    /** Shows [view] over the keys. With a [title], a bar with that title and a back arrow covers the suggestion strip. */
+    private fun show(view: View, title: String? = null): Boolean {
         close()
         helium314.keyboard.fork.ai.ForkAi.onKey() // a panel covers the keys: no proofread or undo offer behind it
         val switcher = KeyboardSwitcher.getInstance()
         val wrapper = switcher.wrapperView ?: return false
         val keyboard = switcher.visibleKeyboardView ?: return false
         if (keyboard.height == 0) return false
+        if (title != null) showTitleBar(wrapper, title) // before the panel attaches, so it knows whether the bar is there
         wrapper.addView(view, FrameLayout.LayoutParams(keyboard.width, keyboard.height))
         view.x = keyboard.left.toFloat()
         overlay = view
         return true
+    }
+
+    /** True while the title bar is up, so a panel needs no close button of its own. */
+    val hasTitleBar get() = titleBar?.isAttachedToWindow == true
+    private var titleBar: View? = null
+
+    private fun showTitleBar(wrapper: View, title: String) {
+        val container = (wrapper.parent as? View)?.findViewById<FrameLayout>(R.id.strip_container) ?: return
+        if (!container.isShown || container.height == 0) return
+        val context = container.context
+        val colors = Settings.getValues().mColors
+        val bar = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setBackgroundColor(colors.get(ColorType.MAIN_BACKGROUND)) // one surface with the panel below
+            isClickable = true // nothing in the strip below reacts while the bar covers it
+        }
+        val back = ImageButton(context).apply {
+            setImageResource(R.drawable.ic_arrow_back)
+            imageTintList = android.content.res.ColorStateList.valueOf(colors.get(ColorType.TOOL_BAR_KEY))
+            background = null
+            contentDescription = context.getString(R.string.spoken_description_action_previous)
+            setOnClickListener { close() }
+        }
+        val edge = context.resources.getDimensionPixelSize(R.dimen.config_suggestions_strip_edge_key_width)
+        bar.addView(back, LinearLayout.LayoutParams(edge, edge).apply { marginStart = 1.dpToPx(context.resources) })
+        bar.addView(TextView(context).apply {
+            text = title
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            setTextColor(ForkColors.readableOn(colors.get(ColorType.MAIN_BACKGROUND), colors.get(ColorType.KEY_TEXT)))
+            maxLines = 1
+            ViewCompat.setAccessibilityHeading(this, true)
+        }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { marginStart = 12.dpToPx(context.resources) })
+        container.addView(bar, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+        titleBar = bar
+    }
+
+    private fun hideTitleBar() {
+        val bar = titleBar ?: return
+        titleBar = null
+        (bar.parent as? ViewGroup)?.removeView(bar)
     }
 
     private fun onToolClicked(tile: View) {

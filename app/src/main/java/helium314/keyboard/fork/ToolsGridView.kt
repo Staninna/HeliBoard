@@ -56,7 +56,10 @@ class ToolsGridView(
             setText(R.string.fork_tools_hint)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
             setTextColor(theme.get(ColorType.KEY_HINT_TEXT))
-            setPadding(startMargin(keys.gap), 0, endMargin(keys.gap), pad - startMargin(keys.gap)) // text starts at the tile edge
+            // text on the same 16 dp margin as the other panels' content, or on the tile edge when the keys sit further in
+            val margin = PanelKit.MARGIN_DP.dpToPx(resources)
+            setPadding(startMargin(keys.gap) + (margin - keys.left).coerceAtLeast(0), 0,
+                endMargin(keys.gap) + (margin - keys.right).coerceAtLeast(0), pad - startMargin(keys.gap))
         })
         tileGap = keys.gap
         val grid = GridLayout(context).apply { columnCount = COLUMNS }
