@@ -2519,6 +2519,8 @@ public final class InputLogic {
                     settingsValues.mSettingsValuesForSuggestion,
                     settingsValues.mAutoCorrectEnabled,
                     inputStyle, sequenceNumber);
+            // fork: emoji for the typed word in any enabled language
+            suggestedWords = helium314.keyboard.fork.EmojiSuggestions.withBestEmoji(suggestedWords, mEmojiDictionaryFacilitator, settingsValues);
             callback.onGetSuggestedWords(suggestedWords);
         } catch (Exception e) {
             // better go without suggestions than have the keyboard crash

@@ -99,6 +99,16 @@ public final class DictionaryCollection extends Dictionary {
         return null;
     }
 
+    // fork: the entry of every dictionary, not only the first one that has the word
+    public ArrayList<WordProperty> getWordProperties(String word) {
+        final ArrayList<WordProperty> properties = new ArrayList<>();
+        for (Dictionary dictionary : mDictionaries) {
+            WordProperty property = dictionary.getWordProperty(word, false);
+            if (property != null) properties.add(property);
+        }
+        return properties;
+    }
+
     @Override
     public boolean isInitialized() {
         return !mDictionaries.isEmpty();

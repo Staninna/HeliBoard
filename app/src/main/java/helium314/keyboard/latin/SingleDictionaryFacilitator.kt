@@ -68,6 +68,11 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
 
     fun getWordProperty(word: String): WordProperty? = dict.getWordProperty(word, false)
 
+    // fork: entries from every dictionary of a collection (emoji keywords in all enabled languages)
+    fun getWordProperties(word: String): List<WordProperty> =
+        (dict as? helium314.keyboard.latin.dictionary.DictionaryCollection)?.getWordProperties(word)
+            ?: listOfNotNull(dict.getWordProperty(word, false))
+
     // ------------ dummy functionality ----------------
 
     override fun isForLocale(locale: Locale?): Boolean = locale == dict.mLocale
