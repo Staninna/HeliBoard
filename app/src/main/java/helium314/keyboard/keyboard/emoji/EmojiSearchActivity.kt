@@ -90,6 +90,7 @@ import helium314.keyboard.keyboard.internal.keyboard_parser.getEmojiKeyDimension
 import helium314.keyboard.keyboard.internal.keyboard_parser.getEmojiNeutralVersion
 import helium314.keyboard.keyboard.internal.keyboard_parser.getEmojiPopupSpec
 import helium314.keyboard.keyboard.internal.keyboard_parser.loadEmojiDefaultVersionsAndPopupSpecs
+import helium314.keyboard.fork.EmojiDicts
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.RichInputMethodManager
 import helium314.keyboard.latin.RichInputMethodSubtype
@@ -413,7 +414,12 @@ class EmojiSearchActivity : ComponentActivity() {
 
         @JvmStatic
         fun createEmojiDictFacilitatorForCurrentSettings(context: Context): SingleDictionaryFacilitator? {
-            val dict = DictionaryFactory.createEmojiDictionaryCollection(context, RichInputMethodManager.getInstance().currentSubtype.locale, Settings.getValues().mSecondaryLocales)
+            val locale = RichInputMethodManager.getInstance().currentSubtype.locale
+            // fork: search every enabled language, using bundled emoji dictionaries
+            val others = (EmojiDicts.otherEnabledLocales(locale) + Settings.getValues().mSecondaryLocales)
+                .distinctBy { it.toLanguageTag() }.filter { it.toLanguageTag() != locale.toLanguageTag() }
+            EmojiDicts.extractMissing(context, others + locale)
+            val dict = DictionaryFactory.createEmojiDictionaryCollection(context, locale, others)
             return if (dict == null) null else SingleDictionaryFacilitator(dict)
         }
     }

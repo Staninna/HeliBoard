@@ -8,6 +8,7 @@ package helium314.keyboard.latin.dictionary
 import android.content.Context
 import android.text.TextUtils
 import com.android.inputmethod.latin.utils.BinaryDictionaryUtils
+import helium314.keyboard.fork.EmojiDicts
 import helium314.keyboard.latin.common.FileUtils
 import helium314.keyboard.latin.common.LocaleUtils.constructLocale
 import helium314.keyboard.latin.common.loopOverCodePoints
@@ -106,13 +107,17 @@ object DictionaryInfoUtils {
     }
 
     @JvmStatic
-    fun getLocalesWithEmojiDicts(context: Context): List<Locale> =
-        SubtypeSettings.getEnabledSubtypes(true)
-            .map { it.locale() }.filter { getCachedDictForLocaleAndType(it, Dictionary.TYPE_EMOJI, context) != null }
+    fun getLocalesWithEmojiDicts(context: Context): List<Locale> {
+        val locales = SubtypeSettings.getEnabledSubtypes(true).map { it.locale() }
+        EmojiDicts.extractMissing(context, locales) // fork: bundled emoji dictionaries
+        return locales.filter { getCachedDictForLocaleAndType(it, Dictionary.TYPE_EMOJI, context) != null }
+    }
 
     @JvmStatic
     fun getCachedDictForLocaleAndType(locale: Locale, type: String, context: Context): File? =
-        getCachedDictsForLocale(locale, context).firstOrNull { it.name.substringBefore("_") == type }
+        // fork: also find extracted asset dicts (<type>.dict), preferring the user's own <type>_user.dict
+        getCachedDictsForLocale(locale, context).filter { it.name.substringBefore("_").substringBefore(".") == type }
+            .minByOrNull { if (it.name.endsWith(USER_DICTIONARY_SUFFIX)) 0 else 1 }
 
     fun getCachedDictsForLocale(locale: Locale, context: Context) =
         getCacheDirectoryForLocale(locale, context)?.let { File(it).listFiles() }.orEmpty()

@@ -55,6 +55,7 @@ import kotlin.test.assertEquals
     ShadowKeyboardSwitcher::class,
     ShadowHandler::class,
     ShadowFacilitator2::class,
+    helium314.keyboard.fork.ShadowNoNativeDictionaries::class, // fork: bundled emoji dicts
 ])
 class InputLogicTest {
     private val latinIME = Robolectric.setupService(LatinIME::class.java)
