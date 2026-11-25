@@ -118,7 +118,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private val suggestionsStrip: ViewGroup = findViewById(R.id.suggestions_strip)
     private val toolbarExpandKey = findViewById<ImageButton>(R.id.suggestions_strip_toolbar_key)
     private val incognitoIcon = KeyboardIconsSet.instance.getNewDrawable(ToolbarKey.INCOGNITO.name, context)
-    private val toolbarArrowIcon = KeyboardIconsSet.instance.getNewDrawable(KeyboardIconsSet.NAME_TOOLBAR_KEY, context)
+    // fork: Gboard's grid icon, the key opens the tools grid
+    private val toolbarArrowIcon = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.ic_fork_apps)?.mutate()
     private val defaultToolbarBackground: Drawable = toolbarExpandKey.background
     private val enabledToolKeyBackground = GradientDrawable()
     private var direction = 1 // 1 if LTR, -1 if RTL
@@ -334,6 +335,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
         AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, this, HapticEvent.KEY_PRESS)
         if (view === toolbarExpandKey) {
+            // fork: the expand key opens the tools grid
+            if (helium314.keyboard.fork.ForkPanels.toggleToolsGrid(this)) return
             setToolbarVisibility(toolbarContainer.visibility != VISIBLE)
         }
 
@@ -348,6 +351,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     }
 
     override fun onLongClick(view: View): Boolean {
+        if (view.parent === pinnedKeys && helium314.keyboard.fork.ForkPanels.onLongClickPinnedKey(view)) return true // fork: drag to unpin
         if (view.tag is ToolbarKey) {
             onLongClickToolbarKey(view)
             return true
@@ -520,6 +524,29 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         toolbarExpandKey.setOnClickListener(if (!toolbarIsExpandable) null else this)
         pinnedKeys.visibility = suggestionsStrip.visibility
         isExternalSuggestionVisible = false
+    }
+
+    // fork: tools grid access to the pinned row
+    val forkToolbarVisible get() = toolbarContainer.isVisible
+    val forkPinnedKeys: ViewGroup get() = pinnedKeys
+
+    // fork: rebuild the pinned row after the tools grid changed it
+    fun forkReloadPinnedKeys() {
+        pinnedKeys.removeAllViews()
+        val colors = Settings.getValues().mColors
+        val pinned = getPinnedToolbarKeys(context.prefs())
+        for (pinnedKey in pinned) {
+            val button = createToolbarKey(context, pinnedKey)
+            button.layoutParams = LinearLayout.LayoutParams(toolbarKeyLayoutParams)
+            setupKey(button, colors)
+            pinnedKeys.addView(button)
+        }
+        if (!Settings.getValues().mQuickPinToolbarKeys) return
+        for (i in 0 until toolbar.childCount) {
+            val key = toolbar.getChildAt(i)
+            key.background = if (key.tag in pinned) enabledToolKeyBackground
+                else defaultToolbarBackground.constantState?.newDrawable(resources)
+        }
     }
 
     private fun addKeyToPinnedKeys(pinnedKey: ToolbarKey) {

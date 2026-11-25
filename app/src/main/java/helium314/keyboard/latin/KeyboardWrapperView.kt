@@ -148,6 +148,7 @@ class KeyboardWrapperView @JvmOverloads constructor(
                 keyboardLeft + keyboardView.measuredWidth,
                 keyboardView.measuredHeight
         )
+        helium314.keyboard.fork.ForkPanels.layoutOverlay(keyboardView) // fork
 
         val scale = Settings.getValues().mKeyboardHeightScale
         // scale one-handed mode button height if keyboard height scale is < 80%

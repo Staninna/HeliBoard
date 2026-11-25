@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Strings for the fork's own features, kept apart from upstream's strings.xml -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Toolbar key that opens the keyboard resize handle. Name must match ToolbarKey.RESIZE -->
+    <string name="resize" tools:keep="@string/resize">Resize keyboard</string>
+    <!-- Hint at the top of the tools panel -->
+    <string name="fork_tools_hint">Tap a tool to use it. Drag it to the bar above to pin it, or drag a pinned tool down here to unpin it.</string>
+    <!-- Keyboard height in the resize overlay; %d is the height in percent -->
+    <string name="fork_resize_value">%d%%</string>
+    <!-- Hint under the height in the resize overlay -->
+    <string name="fork_resize_hint">Drag the handle, or tap − and +</string>
+    <!-- Button that resets the keyboard height to the default -->
+    <string name="fork_resize_reset">Reset</string>
+    <!-- Button that closes the resize overlay -->
+    <string name="fork_resize_done">Done</string>
+    <!-- Text in the search box at the top of the emoji panel -->
+    <string name="fork_emoji_search">Search emoji</string>
+    <!-- Kaomoji group names, matching the categories in assets/kaomoji/kaomoji.tsv -->
+    <string name="fork_kaomoji_smile">Happy</string>
+    <string name="fork_kaomoji_sadness">Sad</string>
+    <string name="fork_kaomoji_sweat">Awkward</string>
+    <string name="fork_kaomoji_displeasure">Annoyed</string>
+    <string name="fork_kaomoji_surprise">Surprised</string>
+</resources>

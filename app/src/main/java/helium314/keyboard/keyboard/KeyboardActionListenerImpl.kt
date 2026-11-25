@@ -104,6 +104,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     }
 
     override fun onCodeInput(primaryCode: Int, x: Int, y: Int, isKeyRepeat: Boolean) {
+        if (helium314.keyboard.fork.ForkKeys.onCodeInput(primaryCode)) return // fork: Gboard-style panels
         when (primaryCode) {
             KeyCode.TOGGLE_AUTOCORRECT -> return settings.toggleAutoCorrect()
             KeyCode.TOGGLE_INCOGNITO_MODE -> {
@@ -147,7 +148,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 //            if (mkv.keyboard?.mId?.isAlphabetShiftedManually == true)
 //                Event.createSoftwareKeypressEvent(primaryCode, metaState or KeyEvent.META_SHIFT_ON, mkv.getKeyX(x), mkv.getKeyY(y), isKeyRepeat)
 //            else Event.createSoftwareKeypressEvent(primaryCode, metaState, mkv.getKeyX(x), mkv.getKeyY(y), isKeyRepeat)
-            Event.createSoftwareKeypressEvent(primaryCode, metaState,
+            Event.createSoftwareKeypressEvent(primaryCode, metaState or helium314.keyboard.fork.ForkKeys.extraMetaState(primaryCode), // fork: select mode
                 mkv?.getKeyX(x) ?: Constants.NOT_A_COORDINATE, mkv?.getKeyY(y) ?: Constants.NOT_A_COORDINATE, isKeyRepeat)
         }
         latinIME.onEvent(event)

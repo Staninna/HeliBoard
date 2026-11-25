@@ -2211,12 +2211,23 @@ public final class InputLogic {
      */
     public void sendDownUpKeyEventWithMetaState(final int keyCode, final int metaState) {
         final long eventTime = SystemClock.uptimeMillis();
+        // fork: text views only extend the selection while a shift key is down, so hold one around shifted cursor moves
+        final boolean holdShift = helium314.keyboard.fork.ForkKeys.needsShiftHeld(keyCode, metaState);
+        if (holdShift) sendShiftKeyEvent(KeyEvent.ACTION_DOWN, eventTime);
         mConnection.sendKeyEvent(new KeyEvent(eventTime, eventTime,
                 KeyEvent.ACTION_DOWN, keyCode, 0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                 KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE));
         mConnection.sendKeyEvent(new KeyEvent(SystemClock.uptimeMillis(), eventTime,
                 KeyEvent.ACTION_UP, keyCode, 0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                 KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE));
+        if (holdShift) sendShiftKeyEvent(KeyEvent.ACTION_UP, eventTime);
+    }
+
+    // fork: a left shift key press, see sendDownUpKeyEventWithMetaState
+    private void sendShiftKeyEvent(final int action, final long downTime) {
+        final int meta = action == KeyEvent.ACTION_DOWN ? KeyEvent.META_SHIFT_ON | KeyEvent.META_SHIFT_LEFT_ON : 0;
+        mConnection.sendKeyEvent(new KeyEvent(downTime, SystemClock.uptimeMillis(), action, KeyEvent.KEYCODE_SHIFT_LEFT, 0, meta,
+                KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE));
     }
 
     /**

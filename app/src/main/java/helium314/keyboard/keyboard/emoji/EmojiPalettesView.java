@@ -364,6 +364,7 @@ public final class EmojiPalettesView extends LinearLayout
         final KeyDrawParams params = new KeyDrawParams();
         params.updateParams(mEmojiLayoutParams.getBottomRowKeyboardHeight(), keyVisualAttr);
         new EmojiLayoutParams(getResources()).setEmojiListProperties(mPager); // necessary when floating
+        helium314.keyboard.fork.ForkEmoji.onStart(this, mPager, editorInfo, keyboardActionListener); // fork: search box and kaomoji
         mEmojiCategory.reloadRecents(); // in case recents changed from outside emoji keyboards
         setupSidePadding();
         initDictionaryFacilitator();
