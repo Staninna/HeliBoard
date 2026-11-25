@@ -1,8 +1,8 @@
 [
   [
     { "label": "alpha", "width": 0.15 },
-    { "label": "!icon/emoji|!code/-19004", "width": 0.12 },
-    { "label": "(^‿^)|!code/-19003", "width": 0.12 },
+    { "label": "!icon/emoji|!code/-19004", "type": "function", "width": 0.12 },
+    { "label": "(^‿^)|!code/-19003", "type": "function", "width": 0.12 },
     { "label": "space", "width": -1 },
     { "label": "delete", "width": 0.15 }
   ]

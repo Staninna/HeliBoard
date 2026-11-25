@@ -22,7 +22,8 @@ object ForkToolbar {
         val ordered = prefs.getString(Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref)!!
             .split(Separators.ENTRY)
             .mapNotNull { entry -> ToolbarKey.entries.firstOrNull { it.name == entry.substringBefore(Separators.KV) } }
-        return (ordered + ToolbarKey.entries).distinct().filterNot { it in notTools }
+        val voice = Settings.getValues().mShowsVoiceInputKey
+        return (ordered + ToolbarKey.entries).distinct().filterNot { it in notTools || (it == ToolbarKey.VOICE && !voice) }
     }
 
     /** Pins [key] so it becomes the [index]th pinned key, counting only pinned keys. */

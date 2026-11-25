@@ -46,12 +46,13 @@ class KaomojiView(context: Context, private val onPick: (String) -> Unit) : Scro
                 text = categoryName(category)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
                 setTextColor(colors.get(ColorType.KEY_HINT_TEXT))
-                setPadding(pad * 2, pad, pad, pad / 2)
+                setPadding(0, pad, 0, pad / 2) // starts on the key edge, see ForkEmoji.alignToKeys
             })
             val grid = GridLayout(context).apply { columnCount = COLUMNS }
             kaomoji.forEach { grid.addView(cell(it)) }
             content.addView(grid)
         }
+        isVerticalScrollBarEnabled = false
         addView(content)
     }
 

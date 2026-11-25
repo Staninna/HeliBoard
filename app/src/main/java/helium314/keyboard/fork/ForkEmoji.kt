@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -15,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import helium314.keyboard.keyboard.KeyboardActionListener
+import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.keyboard.MainKeyboardView
 import helium314.keyboard.keyboard.emoji.EmojiSearchActivity
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
@@ -32,6 +34,7 @@ import java.lang.ref.WeakReference
 object ForkEmoji {
     private const val SEARCH_TAG = "fork_emoji_search"
     private const val KAOMOJI_TAG = "fork_kaomoji"
+    private const val PILL_TAG = "fork_emoji_search_pill"
     private var palettes = WeakReference<LinearLayout>(null)
 
     /** Called each time the emoji panel opens, after upstream sized the emoji pages. */
@@ -45,6 +48,7 @@ object ForkEmoji {
 
         // no search box inside the emoji search itself, the search field is right above
         search.isVisible = editorInfo == null || EmojiSearchActivity.decodePrivateImeOptions(editorInfo).height == 0
+        alignToKeys(search, kaomoji, palettes.findViewById(R.id.bottom_row_keyboard))
         val pagerHeight = pager.layoutParams.height
         val searchHeight = if (search.isVisible) search.layoutParams.height else 0
         pager.layoutParams = pager.layoutParams.apply { height = pagerHeight - searchHeight }
@@ -62,6 +66,12 @@ object ForkEmoji {
         val kaomoji = palettes.findViewWithTag<View>(KAOMOJI_TAG) ?: return
         palettes.findViewById<View>(R.id.emoji_pager)?.isVisible = !show
         kaomoji.isVisible = show
+        // the emoji category tabs and page indicator mean nothing on the kaomoji page; hide them but keep their space
+        palettes.findViewById<View>(R.id.emoji_category_page_id_view)?.visibility = if (show) View.INVISIBLE else View.VISIBLE
+        KeyboardSwitcher.getInstance().emojiTabStrip?.let { strip ->
+            if (show && strip.visibility == View.VISIBLE) strip.visibility = View.INVISIBLE
+            else if (!show && strip.visibility == View.INVISIBLE) strip.visibility = View.VISIBLE
+        }
         palettes.findViewById<MainKeyboardView>(R.id.bottom_row_keyboard)?.apply {
             updateLockState(KeyCode.FORK_KAOMOJI_TAB, show)
             updateLockState(KeyCode.FORK_EMOJI_TAB, !show)
@@ -72,19 +82,21 @@ object ForkEmoji {
         val context = palettes.context
         val res = context.resources
         val colors = Settings.getValues().mColors
+        // same measures as the bar in the search screen: icon 16 dp in, text at 52 dp
         val pill = TextView(context).apply {
+            tag = PILL_TAG
             setText(R.string.fork_emoji_search)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
             setTextColor(colors.get(ColorType.EMOJI_SEARCH_TEXT))
             gravity = Gravity.CENTER_VERTICAL
-            compoundDrawablePadding = 8.dpToPx(res)
-            setPadding(12.dpToPx(res), 0, 12.dpToPx(res), 0)
+            compoundDrawablePadding = 12.dpToPx(res)
+            setPadding(16.dpToPx(res), 0, 16.dpToPx(res), 0)
             val icon = ContextCompat.getDrawable(context, R.drawable.sym_keyboard_search_rounded)?.mutate()
-            icon?.setBounds(0, 0, 20.dpToPx(res), 20.dpToPx(res))
+            icon?.setBounds(0, 0, 24.dpToPx(res), 24.dpToPx(res))
             icon?.let { colors.setColor(it, ColorType.EMOJI_SEARCH_TEXT) }
             setCompoundDrawablesRelative(icon, null, null, null)
             background = GradientDrawable().apply {
-                cornerRadius = 20.dpToPx(res).toFloat()
+                cornerRadius = 999f
                 setColor(colors.get(ColorType.EMOJI_SEARCH_BACKGROUND))
             }
             setOnClickListener {
@@ -93,10 +105,22 @@ object ForkEmoji {
         }
         return FrameLayout(context).apply {
             tag = SEARCH_TAG
-            val margin = 6.dpToPx(res)
-            addView(pill, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-                .apply { setMargins(margin * 2, margin, margin * 2, margin) })
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 48.dpToPx(res))
+            addView(pill, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, SEARCH_BAR_HEIGHT_DP.dpToPx(res), Gravity.CENTER_VERTICAL))
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (SEARCH_BAR_HEIGHT_DP + 16).dpToPx(res))
         }
     }
+
+    /** Puts the pill's sides and the kaomoji page's content on the outer edges of the bottom row's keys. */
+    private fun alignToKeys(search: View, kaomoji: View, bottomRow: MainKeyboardView?) {
+        val keys = KeyGeometry.of(bottomRow?.keyboard) ?: return
+        val left = bottomRow!!.left + bottomRow.paddingLeft + keys.left
+        val right = keys.right + bottomRow.paddingRight
+        search.findViewWithTag<View>(PILL_TAG)?.let { pill ->
+            pill.layoutParams = (pill.layoutParams as FrameLayout.LayoutParams).apply { leftMargin = left; rightMargin = right }
+        }
+        (kaomoji as? ViewGroup)?.getChildAt(0)?.updatePadding(left = left, right = right)
+    }
+
+    /** Height of the search pill, shared with the search screen. */
+    const val SEARCH_BAR_HEIGHT_DP = 40
 }

@@ -312,14 +312,18 @@ public class Key implements Comparable<Key> {
         final float horizontalGapFloat = isSpacer() ? 0 : (keyParams.mKeyboardParams.mRelativeHorizontalGap * keyParams.mKeyboardParams.mOccupiedWidth);
         mHorizontalGap = Math.round(horizontalGapFloat);
         mVerticalGap = Math.round(keyParams.mKeyboardParams.mRelativeVerticalGap * keyParams.mKeyboardParams.mOccupiedHeight);
-        mWidth = Math.round(keyParams.mAbsoluteWidth - horizontalGapFloat);
+        // fork: round the key's cell edges once and put the whole-pixel gap inside them, so every gap between
+        // neighbouring keys is exactly mHorizontalGap (rounding x and width separately made some gaps a pixel off)
+        final int cellLeft = Math.round(keyParams.xPos);
+        final int cellRight = Math.round(keyParams.xPos + keyParams.mAbsoluteWidth);
+        mWidth = cellRight - cellLeft - mHorizontalGap;
         // height is always rounded down, because rounding up may make the keyboard too high to fit, leading to issues
         mHeight = (int) (keyParams.mAbsoluteHeight - keyParams.mKeyboardParams.mVerticalGap);
         if (!isSpacer() && (mWidth == 0 || mHeight == 0)) {
             throw new IllegalStateException("key needs positive width and height");
         }
         // Horizontal gap is divided equally to both sides of the key.
-        mX = Math.round(keyParams.xPos + horizontalGapFloat / 2);
+        mX = cellLeft + mHorizontalGap / 2; // fork: see cellLeft
         mY = Math.round(keyParams.yPos);
         mHitBox.set(Math.round(keyParams.xPos), Math.round(keyParams.yPos), Math.round(keyParams.xPos + keyParams.mAbsoluteWidth) + 1,
                 Math.round(keyParams.yPos + keyParams.mAbsoluteHeight));

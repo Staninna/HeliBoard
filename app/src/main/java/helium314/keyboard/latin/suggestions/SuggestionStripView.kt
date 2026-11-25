@@ -530,6 +530,11 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     val forkToolbarVisible get() = toolbarContainer.isVisible
     val forkPinnedKeys: ViewGroup get() = pinnedKeys
 
+    // fork: while the tools grid is open the bar only shows the pinned tools, without empty suggestion slots
+    fun forkHideSuggestions() {
+        suggestionsStrip.visibility = INVISIBLE // keeps its space, so the pinned tools stay on the right
+    }
+
     // fork: rebuild the pinned row after the tools grid changed it
     fun forkReloadPinnedKeys() {
         pinnedKeys.removeAllViews()

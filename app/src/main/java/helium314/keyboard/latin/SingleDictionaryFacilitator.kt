@@ -28,6 +28,9 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
      * Other suggestion fields of combined matches are taken from the highest-score one.
      */
     fun getSuggestions(words: List<String>): SuggestionResults {
+        // fork: fuzzy emoji search, the dictionary's own typo correction finds the wrong emoji
+        if (dict.mDictType == Dictionary.TYPE_EMOJI)
+            helium314.keyboard.fork.EmojiFuzzy.suggestions(words, dict)?.let { return it }
         val suggestionResults = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, NgramContext.EMPTY_PREV_WORDS_INFO, false)
         words.flatMap { word -> getSuggestions(word).distinctBy { it.word } } // Filter out duplicate results per word
             .groupBy { it.word }

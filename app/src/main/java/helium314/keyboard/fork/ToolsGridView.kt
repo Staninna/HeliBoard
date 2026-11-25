@@ -39,24 +39,31 @@ class ToolsGridView(
     private val onDropped: (ToolDrag) -> Unit,
 ) : FrameLayout(context) {
     private val theme = Settings.getValues().mColors
+    private var tileGap = 0 // set in init from the keyboard, before the tiles are built
 
     init {
         theme.setBackground(this, ColorType.MAIN_BACKGROUND)
         isClickable = true // keep touches away from the keyboard below
         val pad = 8.dpToPx(resources)
 
-        val content = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL; setPadding(pad, pad, pad, pad) }
+        // tiles line up with the keys below: same outer edges, same gap between them
+        val keys = KeyGeometry.current() ?: KeyGeometry(pad / 2, pad / 2, pad / 2)
+        val content = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(keys.left - startMargin(keys.gap), pad, keys.right - endMargin(keys.gap), pad)
+        }
         content.addView(TextView(context).apply {
             setText(R.string.fork_tools_hint)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
             setTextColor(theme.get(ColorType.KEY_HINT_TEXT))
-            setPadding(pad, 0, pad, pad)
+            setPadding(startMargin(keys.gap), 0, endMargin(keys.gap), pad - startMargin(keys.gap)) // text starts at the tile edge
         })
+        tileGap = keys.gap
         val grid = GridLayout(context).apply { columnCount = COLUMNS }
         ForkToolbar.gridKeys(context.prefs()).forEach { grid.addView(tile(it)) }
         content.addView(grid, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
 
-        addView(ScrollView(context).apply { addView(content) }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+        addView(ScrollView(context).apply { isVerticalScrollBarEnabled = false; addView(content) }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
         setOnDragListener(::onDrag)
         // the keyboard area reaches under the navigation bar, keep the last row scrollable above it
         doOnAttach {
@@ -92,12 +99,19 @@ class ToolsGridView(
             ellipsize = TextUtils.TruncateAt.END
             setPadding(4.dpToPx(resources), 2.dpToPx(resources), 4.dpToPx(resources), 0)
         })
-        val margin = 4.dpToPx(resources)
         tile.layoutParams = GridLayout.LayoutParams(
             GridLayout.spec(GridLayout.UNDEFINED), GridLayout.spec(GridLayout.UNDEFINED, 1f)
-        ).apply { width = 0; height = tileHeight; setMargins(margin, margin, margin, margin) }
+        ).apply {
+            width = 0
+            height = tileHeight
+            setMargins(startMargin(tileGap), startMargin(tileGap), endMargin(tileGap), endMargin(tileGap))
+        }
         return tile
     }
+
+    // the gap splits over both sides; an odd pixel goes to the end, so neighbours are exactly one gap apart
+    private fun startMargin(gap: Int) = gap / 2
+    private fun endMargin(gap: Int) = gap - gap / 2
 
     private fun onDrag(view: View, event: DragEvent): Boolean {
         val drag = event.localState as? ToolDrag ?: return false

@@ -26,6 +26,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -115,7 +118,8 @@ const val TAG = "emoji-search"
  * This activity is displayed in a gap created for it above the keyboard and below the host app, and disables the host app.
  */
 class EmojiSearchActivity : ComponentActivity() {
-    private val colors = Settings.getValues().mColors
+    // fork: lazy, Android may recreate this activity in a new process before the keyboard loaded its settings
+    private val colors by lazy { Settings.getValues().mColors }
     private var imeOpened = false
     private var firstSearchDone = false
     private var screenHeight by Delegates.notNull<Int>()
@@ -140,6 +144,11 @@ class EmojiSearchActivity : ComponentActivity() {
     @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // fork: restored without a running keyboard (after an update or process death), nothing to search with
+        if (Settings.getValues() == null) {
+            finish()
+            return
+        }
         init()
         enableEdgeToEdge()
         setContent {
@@ -174,24 +183,26 @@ class EmojiSearchActivity : ComponentActivity() {
                             heightDp = with(localDensity) { it.size.height.toDp() }
                         }) {
                         val fontFamily = remember { KeyboardTypeface.customFontFamily() }
-                        Row(modifier = Modifier.fillMaxWidth().height(30.dp)) {
-                            IconButton(onClick = { cancel() }) {
-                                Icon(painter = painterResource(R.drawable.ic_arrow_back),
-                                    stringResource(R.string.spoken_description_action_previous),
-                                    tint = Color(colors.get(ColorType.EMOJI_KEY_TEXT)))
-                            }
-                            Text(text = stringResource(R.string.emoji_search_title), fontSize = 18.sp,
-                                fontFamily = fontFamily,
-                                color = Color(colors.get(ColorType.EMOJI_KEY_TEXT)),
-                                modifier = Modifier.fillMaxWidth().align(Alignment.CenterVertically))
-                        }
+                        // fork: no title row, the search bar below says what this is and has the back arrow
                         key(emojiPageKeyboardView) {
                             AndroidView({ emojiPageKeyboardView }, modifier = Modifier.wrapContentHeight().fillMaxWidth())
                         }
                         val focusRequester = remember { FocusRequester() }
                         var text by remember { mutableStateOf(TextFieldValue(searchText, selection = TextRange(searchText.length))) }
+                        // fork: the pill behind the field carries the color, the field itself is transparent
+                        val searchBarColor = Color(colors.get(ColorType.EMOJI_SEARCH_BACKGROUND))
+                        val keyEdges = remember { helium314.keyboard.fork.KeyGeometry.current() }
+                        val barStart = keyEdges?.let { with(localDensity) { it.left.toDp() } } ?: 4.dp
+                        val barEnd = keyEdges?.let { with(localDensity) { it.right.toDp() } } ?: 4.dp
                         val textFieldColors = TextFieldDefaults.colors().copy(
-                            unfocusedContainerColor = Color(colors.get(ColorType.EMOJI_SEARCH_BACKGROUND)),
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = Color(colors.get(ColorType.EMOJI_SEARCH_TEXT)),
+                            focusedLeadingIconColor = Color(colors.get(ColorType.EMOJI_SEARCH_TEXT)),
+                            focusedTrailingIconColor = Color(colors.get(ColorType.EMOJI_SEARCH_TEXT)),
+                            focusedPlaceholderColor = lerp(searchBarColor, Color(colors.get(ColorType.EMOJI_SEARCH_TEXT)), 0.6f),
                             unfocusedTextColor = Color(colors.get(ColorType.EMOJI_SEARCH_TEXT)),
                             cursorColor = Color(colors.get(ColorType.EMOJI_SEARCH_TEXT)),
                             unfocusedLeadingIconColor = Color(colors.get(ColorType.EMOJI_SEARCH_TEXT)),
@@ -204,7 +215,11 @@ class EmojiSearchActivity : ComponentActivity() {
                         ) {
                             BasicTextField(
                                 value = text,
-                                modifier = Modifier.fillMaxWidth().heightIn(20.dp, 30.dp).focusRequester(focusRequester),
+                                // fork: M3 search bar, a pill whose sides sit on the outer edges of the keys below
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(start = barStart, end = barEnd, top = 8.dp, bottom = 8.dp)
+                                    .height(helium314.keyboard.fork.ForkEmoji.SEARCH_BAR_HEIGHT_DP.dp)
+                                    .clip(CircleShape).background(searchBarColor).focusRequester(focusRequester),
                                 textStyle = TextStyle(fontFamily = fontFamily, textDirection = TextDirection.Content, color = textFieldColors.unfocusedTextColor),
                                 onValueChange = {
                                     text = it
@@ -229,17 +244,22 @@ class EmojiSearchActivity : ComponentActivity() {
                                      * This is the reason for not using [androidx.compose.material3.TextField],
                                      * which uses [TextFieldDefaults.contentPaddingWithoutLabel]
                                      */
-                                    contentPadding = PaddingValues(2.dp),
+                                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
                                     visualTransformation = VisualTransformation.None,
                                     innerTextField = it,
-                                    placeholder = { Text(stringResource(R.string.search_field_placeholder), fontFamily = fontFamily) },
-                                    leadingIcon = { SearchIcon() },
-                                    trailingIcon = {
+                                    placeholder = { Text(stringResource(R.string.fork_emoji_search), fontFamily = fontFamily, fontSize = 16.sp) },
+                                    // fork: back arrow closes the search, clear only shows when there is text
+                                    leadingIcon = {
+                                        IconButton(onClick = { cancel() }) {
+                                            Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.spoken_description_action_previous))
+                                        }
+                                    },
+                                    trailingIcon = if (text.text.isEmpty()) null else { {
                                         IconButton(onClick = {
                                             text = TextFieldValue()
                                             search("")
                                         }) { CloseIcon(cancel) }
-                                    },
+                                    } },
                                     singleLine = true,
                                     enabled = true,
                                     interactionSource = MutableInteractionSource(),
@@ -419,6 +439,7 @@ class EmojiSearchActivity : ComponentActivity() {
             val others = (EmojiDicts.otherEnabledLocales(locale) + Settings.getValues().mSecondaryLocales)
                 .distinctBy { it.toLanguageTag() }.filter { it.toLanguageTag() != locale.toLanguageTag() }
             EmojiDicts.extractMissing(context, others + locale)
+            helium314.keyboard.fork.EmojiFuzzy.prepare(context, listOf(locale) + others) // fork: fuzzy search index
             val dict = DictionaryFactory.createEmojiDictionaryCollection(context, locale, others)
             return if (dict == null) null else SingleDictionaryFacilitator(dict)
         }

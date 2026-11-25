@@ -4,6 +4,7 @@ package helium314.keyboard.fork
 import helium314.keyboard.keyboard.emoji.SupportedEmojis
 import helium314.keyboard.latin.SingleDictionaryFacilitator
 import helium314.keyboard.latin.common.isEmoji
+import helium314.keyboard.latin.dictionary.Dictionary
 import helium314.keyboard.latin.makedict.WordProperty
 import helium314.keyboard.latin.settings.SettingsValues
 import helium314.keyboard.latin.suggestions.Suggest
@@ -31,6 +32,12 @@ object EmojiSuggestions {
         val typed = words.typedWordInfo?.word ?: return words
         if (typed.length < 2) return words
         val keyword = typed.lowercase()
+
+        // fuzzy once the index is ready: completions and typos count too ("pizz", "piza")
+        EmojiFuzzy.index?.let { index ->
+            val emoji = index.bestForTypedWord(keyword) ?: return words
+            return placeEmoji(words, Suggest.useDefaultEmojiSkinTone(EmojiFuzzy.wordInfo(emoji, Dictionary.DICTIONARY_HARDCODED)))
+        }
 
         val targets = rankedEmoji(keyword, emojiDict.getWordProperties(keyword))
         if (targets.isEmpty()) return words

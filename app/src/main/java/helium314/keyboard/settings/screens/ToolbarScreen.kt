@@ -47,6 +47,7 @@ fun ToolbarScreen(
         || !prefs.getBoolean(Settings.PREF_TOOLBAR_HIDING_GLOBAL, Defaults.PREF_TOOLBAR_HIDING_GLOBAL)
     val items = listOf(
         Settings.PREF_TOOLBAR_MODE,
+        helium314.keyboard.fork.ForkSettings.PREF_VOICE_KEY, // fork
         if (toolbarMode == ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_HIDING_GLOBAL else null,
         if (toolbarMode != ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE else null,
         when (toolbarMode) {
@@ -82,6 +83,12 @@ fun createToolbarSettings(context: Context) = listOf(
             items,
             Defaults.PREF_TOOLBAR_MODE
         ) {
+            KeyboardSwitcher.getInstance().setThemeNeedsReload()
+        }
+    },
+    // fork: hide the mic for people who dictate with another app
+    Setting(context, helium314.keyboard.fork.ForkSettings.PREF_VOICE_KEY, R.string.fork_voice_key, R.string.fork_voice_key_summary) {
+        SwitchPreference(it, helium314.keyboard.fork.ForkSettings.DEFAULT_VOICE_KEY) {
             KeyboardSwitcher.getInstance().setThemeNeedsReload()
         }
     },

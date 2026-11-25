@@ -47,6 +47,7 @@ object ForkPanels {
         this.strip = strip
         toolbarWasVisible = strip.forkToolbarVisible
         strip.setToolbarVisibility(false) // the pinned row is where tiles get dropped
+        strip.forkHideSuggestions()
         strip.setOnDragListener(::onDragOverStrip)
         return true
     }
