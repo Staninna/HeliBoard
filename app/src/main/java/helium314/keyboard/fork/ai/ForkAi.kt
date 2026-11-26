@@ -43,11 +43,13 @@ object ForkAi {
     fun onStartInputView(info: EditorInfo?) {
         editorInfo = info
         clearChip()
+        ime.get()?.let { RewriteSession.onKeyboardShown(it, info) }
     }
 
     @JvmStatic
     fun onFinishInputView() {
         clearChip()
+        RewriteSession.onKeyboardHidden()
         helium314.keyboard.fork.online.GifSearch.end() // a search left open would swallow typing in the next field
     }
 

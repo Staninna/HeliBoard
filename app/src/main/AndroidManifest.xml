@@ -16,6 +16,8 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
     <!-- fork: only for opt-in features, and only through fork/net/NetworkGate.kt: SmolChat Server
          on 127.0.0.1, translate with the user's LibreTranslate server, GIF search with KLIPY -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- fork: "rewrite ready" notification, asked for in the Local AI settings -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- fork: dataExtractionRules sets what Seedvault backups take, see xml/fork_backup_rules.xml -->
     <application android:label="@string/english_ime_name"

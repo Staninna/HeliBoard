@@ -10,4 +10,8 @@ object ForkSettings {
     /** Offer the proofread chip after typing (only while paired with SmolChat Server). */
     const val PREF_PROOFREAD_CHIP = "fork_proofread_chip"
     const val DEFAULT_PROOFREAD_CHIP = true
+
+    /** Notify when a rewrite finishes while the keyboard is hidden. Needs the notification permission. */
+    const val PREF_REWRITE_NOTIFY = "fork_rewrite_notify"
+    const val DEFAULT_REWRITE_NOTIFY = true
 }

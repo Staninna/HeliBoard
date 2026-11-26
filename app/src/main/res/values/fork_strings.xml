@@ -74,6 +74,12 @@
     <string name="fork_local_ai_pair_failed">Pairing was not allowed</string>
     <string name="fork_local_ai_proofread">Proofread chip</string>
     <string name="fork_local_ai_proofread_summary">Offer a proofread after you stop typing. Never in password or incognito fields.</string>
+    <string name="fork_local_ai_notify">Notify when a rewrite is ready</string>
+    <string name="fork_local_ai_notify_summary">When you leave the keyboard while a rewrite runs. The notification never shows your text.</string>
+    <string name="fork_rewrite_notify_channel">Rewrites</string>
+    <string name="fork_rewrite_notify_ready">Your rewrite is ready</string>
+    <string name="fork_rewrite_notify_failed">Your rewrite didn\'t work</string>
+    <string name="fork_rewrite_notify_body">Tap to go back to the text field.</string>
     <string name="fork_local_ai_presets">Built in</string>
     <string name="fork_local_ai_custom">Your prompts</string>
     <string name="fork_local_ai_add">Add a prompt</string>

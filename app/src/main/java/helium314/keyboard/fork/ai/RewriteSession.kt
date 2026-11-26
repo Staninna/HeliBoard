@@ -64,6 +64,9 @@ object RewriteSession {
         field = key(info)
         mutableState.value = State.Working(R.string.fork_ai_reading)
         val app = context.applicationContext
+        this.app = app
+        packageName = info?.packageName
+        RewriteNotifier.cancel(app)
         job = scope.launch {
             try {
                 run(app, prompt, read)
@@ -76,8 +79,13 @@ object RewriteSession {
             } catch (e: Exception) {
                 mutableState.value = State.Failed(SmolChat.Problem.FAILED)
             }
+            RewriteNotifier.finished(app, field, packageName, ready = answer != null)
         }
     }
+
+    /** For the notification: the context to post it with and the app the text came from. */
+    private var app: Context? = null
+    private var packageName: String? = null
 
     /** Stops the rewrite and forgets it. */
     fun end() {
@@ -87,6 +95,7 @@ object RewriteSession {
         prompt = null
         target = null
         mutableState.value = null
+        app?.let { RewriteNotifier.cancel(it) }
     }
 
     private suspend fun run(context: Context, prompt: RewritePrompts.Prompt, read: FieldText.Target) {
@@ -119,6 +128,7 @@ object RewriteSession {
             if (!started) {
                 running?.cancel()
                 mutableState.value = State.Failed(null)
+                RewriteNotifier.finished(context, field, packageName, ready = false)
             }
         }
         val caption = when (read.scope) {
@@ -139,6 +149,16 @@ object RewriteSession {
         }
         if (text.isEmpty()) throw SmolChat.Failure(SmolChat.Problem.FAILED)
         mutableState.value = State.Answer(caption, text, done = true)
+    }
+
+    /** The keyboard came up on [info]'s field: no notification while the user can see the rewrite. */
+    fun onKeyboardShown(context: Context, info: EditorInfo?) {
+        RewriteNotifier.visibleField = key(info)
+        if (belongsTo(info)) RewriteNotifier.cancel(context)
+    }
+
+    fun onKeyboardHidden() {
+        RewriteNotifier.visibleField = null
     }
 
     private fun key(info: EditorInfo?) = info?.let { "${it.packageName}/${it.fieldId}/${it.inputType}" }

@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.fork.ai
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -68,6 +70,31 @@ fun LocalAiScreen(onClickBack: () -> Unit) {
     val installed = remember(version) { SmolChat.isInstalled(context) }
     var paired by remember(version) { mutableStateOf(LocalAiPairing.isPaired(context)) }
     var proofread by remember { mutableStateOf(prefs.getBoolean(ForkSettings.PREF_PROOFREAD_CHIP, ForkSettings.DEFAULT_PROOFREAD_CHIP)) }
+    // on only with the pref set and notifications allowed; turning it on asks for the permission
+    var notify by remember(version) { mutableStateOf(RewriteNotifier.enabled(context) && RewriteNotifier.allowed(context)) }
+    val setNotify = { on: Boolean ->
+        notify = on
+        prefs.edit { putBoolean(ForkSettings.PREF_REWRITE_NOTIFY, on) }
+    }
+    val openNotificationSettings = {
+        runCatching {
+            context.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName))
+        }
+        Unit
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted && RewriteNotifier.allowed(context)) setNotify(true) else openNotificationSettings()
+    }
+    val toggleNotify = { on: Boolean ->
+        when {
+            !on -> setNotify(false)
+            RewriteNotifier.allowed(context) -> setNotify(true)
+            else -> {
+                prefs.edit { putBoolean(ForkSettings.PREF_REWRITE_NOTIFY, true) } // shows once allowed in system settings
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
     var custom by remember { mutableStateOf(RewritePrompts.custom(prefs)) }
     var editing by rememberSaveable { mutableStateOf<Int?>(null) } // index in custom, or -1 for a new one
 
@@ -117,6 +144,15 @@ fun LocalAiScreen(onClickBack: () -> Unit) {
                             proofread = it
                             prefs.edit { putBoolean(ForkSettings.PREF_PROOFREAD_CHIP, it) }
                         })
+                    }
+                }} else null, if (paired) {{
+                    Preference(
+                        name = stringResource(R.string.fork_local_ai_notify),
+                        description = stringResource(R.string.fork_local_ai_notify_summary),
+                        onClick = { toggleNotify(!notify) },
+                        icon = R.drawable.ic_fork_rewrite,
+                    ) {
+                        Switch(checked = notify, onCheckedChange = { toggleNotify(it) })
                     }
                 }} else null)
 
