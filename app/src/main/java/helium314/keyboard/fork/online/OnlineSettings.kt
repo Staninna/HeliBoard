@@ -17,12 +17,11 @@ object OnlineSettings {
     const val PREF_TRANSLATE = "fork_translate"
     const val PREF_TRANSLATE_SERVER = "fork_translate_server"
     private const val PREF_TRANSLATE_LANGUAGES = "fork_translate_languages"
-    private const val PREF_TRANSLATE_RECENT = "fork_translate_recent"
+    private const val PREF_TRANSLATE_TARGET = "fork_translate_recent"
     const val PREF_GIFS = "fork_gifs"
 
     private const val TRANSLATE_KEY_FILE = "fork_translate_key.txt"
     private const val GIF_KEY_FILE = "fork_gif_key.txt"
-    private const val RECENT_MAX = 5
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -44,20 +43,15 @@ object OnlineSettings {
         putString(PREF_TRANSLATE_LANGUAGES, json.encodeToString(kotlinx.serialization.builtins.ListSerializer(LibreTranslate.Language.serializer()), languages))
     }
 
-    /** Target languages, most recently used first. */
-    fun recentTargets(prefs: SharedPreferences): List<String> =
-        prefs.getString(PREF_TRANSLATE_RECENT, "").orEmpty().split(',').filter { it.isNotBlank() }
+    /** The target language picked last. Older versions kept a comma-separated list, newest first. */
+    fun lastTarget(prefs: SharedPreferences): String? =
+        prefs.getString(PREF_TRANSLATE_TARGET, "").orEmpty().substringBefore(',').takeIf { it.isNotBlank() }
 
-    fun useTarget(prefs: SharedPreferences, code: String) = prefs.edit {
-        putString(PREF_TRANSLATE_RECENT, (listOf(code) + recentTargets(prefs).filter { it != code }).take(RECENT_MAX).joinToString(","))
-    }
+    fun setLastTarget(prefs: SharedPreferences, code: String) = prefs.edit { putString(PREF_TRANSLATE_TARGET, code) }
 
-    /** The targets to offer, recent ones first, then the rest by name. */
-    fun targetOrder(languages: List<LibreTranslate.Language>, recent: List<String>): List<LibreTranslate.Language> {
-        val byCode = languages.associateBy { it.code }
-        val first = recent.mapNotNull { byCode[it] }
-        return first + (languages - first.toSet()).sortedBy { it.name.lowercase() }
-    }
+    /** The targets to offer, always by name, so the chips stay where they are when one is picked. */
+    fun targetOrder(languages: List<LibreTranslate.Language>): List<LibreTranslate.Language> =
+        languages.sortedBy { it.name.lowercase() }
 
     private fun readKey(context: Context, name: String) = runCatching { file(context, name).readText().trim() }.getOrDefault("")
 

@@ -86,17 +86,14 @@ class TranslateView(context: Context) : FrameLayout(context) {
         scope.cancel()
     }
 
-    private fun targets() = OnlineSettings.targetOrder(languages, OnlineSettings.recentTargets(prefs))
-
     private fun buildChips() {
         chipRow.removeAllViews()
-        for (language in targets()) {
+        for (language in OnlineSettings.targetOrder(languages)) {
             chipRow.addView(PanelKit.chip(context, language.name, language.code == targetCode) {
                 if (language.code == targetCode && job?.isActive == true) return@chip
                 targetCode = language.code
-                OnlineSettings.useTarget(prefs, language.code)
+                OnlineSettings.setLastTarget(prefs, language.code)
                 buildChips()
-                (chipRow.parent as? android.widget.HorizontalScrollView)?.smoothScrollTo(0, 0) // the picked language moved to the front
                 start()
             }, PanelKit.chipParams(context))
         }
@@ -160,10 +157,8 @@ class TranslateView(context: Context) : FrameLayout(context) {
     }
 
     /** The last language used, if the server still has it. */
-    private fun lastTarget(): String? {
-        val codes = languages.map { it.code }
-        return OnlineSettings.recentTargets(prefs).firstOrNull { it in codes }
-    }
+    private fun lastTarget(): String? =
+        OnlineSettings.lastTarget(prefs)?.takeIf { code -> languages.any { it.code == code } }
 
     private fun caption(detected: String?, scope: FieldText.Scope): String {
         val from = detected?.let { code -> languages.firstOrNull { it.code == code }?.name ?: code }

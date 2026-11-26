@@ -34,13 +34,12 @@ class OnlineTest {
         assertEquals(LibreTranslate.Problem.FAILED, LibreTranslate.failureFor(500, null).problem)
     }
 
-    @Test fun recentTargetsComeFirstThenByName() {
+    @Test fun targetsAreAlwaysByName() {
         val languages = listOf(
             LibreTranslate.Language("de", "German"), LibreTranslate.Language("en", "English"),
             LibreTranslate.Language("nl", "Dutch"), LibreTranslate.Language("fr", "French"),
         )
-        assertEquals(listOf("nl", "fr", "en", "de"),
-            OnlineSettings.targetOrder(languages, listOf("nl", "xx", "fr")).map { it.code })
+        assertEquals(listOf("nl", "en", "fr", "de"), OnlineSettings.targetOrder(languages).map { it.code })
     }
 
     private fun gif(slug: String, type: String = "gif", mdSize: Long = 900_000) = """
