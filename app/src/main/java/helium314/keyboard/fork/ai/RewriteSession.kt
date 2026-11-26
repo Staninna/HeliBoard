@@ -126,9 +126,10 @@ object RewriteSession {
             FieldText.Scope.AROUND_CURSOR -> context.getString(R.string.fork_ai_partial)
             FieldText.Scope.FIELD -> prompt.name
         }
+        val language = TextLanguage.of(context, read.text)
         var text = ""
         try {
-            SmolChat.stream(pairing, RewritePrompts.messages(prompt, read.text), RewritePrompts.maxTokens(read.text)).collect {
+            SmolChat.stream(pairing, RewritePrompts.messages(prompt, read.text, language), RewritePrompts.maxTokens(read.text)).collect {
                 started = true
                 text = RewritePrompts.answerFor(read.text, it)
                 mutableState.value = State.Answer(caption, text, done = false)
