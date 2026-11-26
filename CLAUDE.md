@@ -35,8 +35,8 @@ ground rules below are enough to work safely.
   paths or carry `[skip ci]` don't release.
 - **Nothing goes upstream.** Upstream's `AI_USAGE.md` bans AI-made PRs and issues, so fork work
   stays in the fork.
-- **Fork code lives in `helium314.keyboard.fork.*`** and in new files. Upstream files get small
-  hooks marked `// fork:`, so upstream syncs stay easy to merge.
+- **Fork code lives in its own files, and upstream files only get `// fork:` hooks.** See
+  "Fork code and hooks" below before you edit any file outside `fork/`.
 - **Every network request goes through the fork's network gate.** The app has the INTERNET
   permission only for opt-in features: SmolChat on 127.0.0.1, the user's LibreTranslate server,
   and KLIPY for GIFs (`fork/online/`). The gate checks the feature toggle, the host and the scheme.
@@ -53,3 +53,34 @@ ground rules below are enough to work safely.
 - **Commit identity:** pass the GitHub noreply address per commit with
   `git -c user.name=Staninna -c user.email=26458805+Staninna@users.noreply.github.com commit`.
   Never write git config.
+
+## Fork code and hooks
+
+The fork adds a lot on top of upstream, and every upstream sync has to merge cleanly. So each fork
+change is either in a fork file or marked where it touches upstream, and a merge conflict shows at
+a glance whose line it is.
+
+- **New code goes in fork files.** Kotlin goes in `app/src/main/java/helium314/keyboard/fork/`
+  (package `helium314.keyboard.fork`, with `ai/`, `net/`, `online/` and `ui/` below it), tests in
+  `app/src/test/java/helium314/keyboard/fork/`. Resources get a `fork_` prefix:
+  `values/fork_strings.xml`, `drawable/fork_*`, icons `ic_fork_*`, keys and prefs `FORK_*` /
+  `fork_*`. Fork files need no markers.
+- **An upstream file gets a hook, not logic.** A hook is the smallest edit that hands off to fork
+  code, usually one call. Once it needs more than a call and a condition, move the body into a fork
+  file and call that.
+- **Every changed upstream line carries `fork: <why>`**, in the file's own comment syntax: `//` in
+  Kotlin, Java and Gradle, `<!-- -->` in XML. The why says what the hook is for, in a few words:
+
+      helium314.keyboard.fork.ForkPanels.onInputViewCreated(inputView.wrapperView) // fork: panels over the keyboard
+      <item name="keyPreviewBackground">@drawable/fork_key_preview_background</item> <!-- fork: rounder -->
+
+  A hook spanning several lines gets the comment on the line above it. When you change an upstream
+  line that already has a comment, keep that comment and append `fork: <why>`.
+- **Call fork code fully qualified** (`helium314.keyboard.fork.ForkPanels.close()`), so the hook
+  stays one line and the upstream import block stays untouched.
+- **Removing a fork feature removes its hooks too.** This finds every place an upstream file touches the fork:
+
+      grep -rn "fork" app/src/main app/build.gradle.kts --include=*.kt --include=*.java --include=*.xml --include=*.kts | grep -v "/fork/"
+
+- **In a sync conflict on a `fork:` line,** take upstream's version of the line and put the hook
+  back on top of it.
