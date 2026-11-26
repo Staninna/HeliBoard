@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-only -->
-<!-- fork: only the GIF being sent, see fork/online/GifView.kt -->
+<!-- fork: only the GIF or screenshot being sent, see fork/online/GifView.kt and fork/ScreenshotSuggestion.kt -->
 <paths>
     <cache-path
         name="fork_gifs"
         path="fork_gifs/"/>
+    <cache-path
+        name="fork_screens"
+        path="fork_screens/"/>
 </paths>

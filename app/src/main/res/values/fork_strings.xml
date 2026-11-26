@@ -80,6 +80,11 @@
     <string name="fork_rewrite_notify_ready">Your rewrite is ready</string>
     <string name="fork_rewrite_notify_failed">Your rewrite didn\'t work</string>
     <string name="fork_rewrite_notify_body">Tap to go back to the text field.</string>
+    <string name="fork_screenshot_suggestion">Suggest recent screenshots</string>
+    <string name="fork_screenshot_suggestion_summary">Offer a screenshot from the last 10 minutes in apps that take images. Needs access to your photos.</string>
+    <string name="fork_screenshot">Screenshot</string>
+    <string name="fork_screenshot_send">Send screenshot</string>
+    <string name="fork_screenshot_failed">Couldn\'t send the screenshot</string>
     <string name="fork_local_ai_presets">Built in</string>
     <string name="fork_local_ai_custom">Your prompts</string>
     <string name="fork_local_ai_add">Add a prompt</string>

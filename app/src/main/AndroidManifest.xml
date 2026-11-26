@@ -18,6 +18,9 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- fork: "rewrite ready" notification, asked for in the Local AI settings -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- fork: recent screenshot in the suggestion bar, asked for in Text correction -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" /> <!-- fork: same, Android 12 -->
 
     <!-- fork: dataExtractionRules sets what Seedvault backups take, see xml/fork_backup_rules.xml -->
     <application android:label="@string/english_ime_name"

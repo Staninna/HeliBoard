@@ -1397,6 +1397,7 @@ public class LatinIME extends InputMethodService implements
     @Override
     public void setNeutralSuggestionStrip() {
         if (helium314.keyboard.fork.AutofillChips.showInstead(mSuggestionStripView)) return; // fork: keep autofill chips
+        if (helium314.keyboard.fork.ScreenshotSuggestion.showInstead(mSuggestionStripView)) return; // fork: recent screenshot
         final SettingsValues currentSettings = mSettings.getCurrent();
         if (tryShowClipboardSuggestion()) {
             // clipboard suggestion has been set

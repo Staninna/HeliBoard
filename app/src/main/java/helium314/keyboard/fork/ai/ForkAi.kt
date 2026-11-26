@@ -44,12 +44,14 @@ object ForkAi {
         editorInfo = info
         clearChip()
         ime.get()?.let { RewriteSession.onKeyboardShown(it, info) }
+        ime.get()?.let { helium314.keyboard.fork.ScreenshotSuggestion.onShown(it, info) }
     }
 
     @JvmStatic
     fun onFinishInputView() {
         clearChip()
         RewriteSession.onKeyboardHidden()
+        helium314.keyboard.fork.ScreenshotSuggestion.onHidden()
         helium314.keyboard.fork.online.GifSearch.end() // a search left open would swallow typing in the next field
     }
 

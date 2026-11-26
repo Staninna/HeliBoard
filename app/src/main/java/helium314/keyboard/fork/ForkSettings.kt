@@ -14,4 +14,8 @@ object ForkSettings {
     /** Notify when a rewrite finishes while the keyboard is hidden. Needs the notification permission. */
     const val PREF_REWRITE_NOTIFY = "fork_rewrite_notify"
     const val DEFAULT_REWRITE_NOTIFY = true
+
+    /** Offer a recent screenshot in the empty suggestion bar. Needs the photo permission. */
+    const val PREF_SCREENSHOT_SUGGESTION = "fork_screenshot_suggestion"
+    const val DEFAULT_SCREENSHOT_SUGGESTION = false
 }
