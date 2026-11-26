@@ -20,28 +20,24 @@ import helium314.keyboard.latin.common.ColorType
 import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.settings.SettingsActivity
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.net.ConnectException
 
 /**
  * Fork: the rewrite panel over the keys. Pick what to do with the chips at the top; SmolChat's
  * answer streams into the card below, and Replace puts it into the app's text field in one edit.
+ * The work itself lives in [RewriteSession], so it survives the keyboard hiding.
  */
 @SuppressLint("ViewConstructor")
 class RewriteView(context: Context, firstPrompt: RewritePrompts.Prompt?) : FrameLayout(context) {
     private val prefs = context.prefs()
     private val scope = MainScope()
-    private var job: Job? = null
 
     private val prompts = RewritePrompts.all(prefs)
-    private var prompt = firstPrompt ?: RewritePrompts.last(prefs)
-    private var target: FieldText.Target? = null
-    private var answer: String? = null
+    /** Without [firstPrompt] and with a rewrite still going on this field, the panel picks that one up again. */
+    private val resume = firstPrompt == null && RewriteSession.belongsTo(ForkAi.currentEditorInfo) && RewriteSession.prompt != null
+    private var prompt = if (resume) RewriteSession.prompt!! else firstPrompt ?: RewritePrompts.last(prefs)
 
     private val chipRow = LinearLayout(context)
     private val card = PanelCard(context)
@@ -79,20 +75,21 @@ class RewriteView(context: Context, firstPrompt: RewritePrompts.Prompt?) : Frame
         doOnAttach {
             PanelKit.keepAboveNavBar(this)
             cancel.isVisible = !ForkPanels.hasTitleBar // the title bar's back arrow closes the panel
-            start()
+            if (!resume) start()
+            scope.launch { RewriteSession.state.collect(::render) }
         }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        scope.cancel()
+        scope.cancel() // the rewrite itself goes on in RewriteSession
     }
 
     private fun buildChips() {
         chipRow.removeAllViews()
         for (p in prompts) {
             chipRow.addView(PanelKit.chip(context, p.name, p == prompt) {
-                if (p == prompt && job?.isActive == true) return@chip
+                if (p == prompt && RewriteSession.isWorking) return@chip
                 prompt = p
                 RewritePrompts.remember(prefs, p)
                 buildChips()
@@ -103,91 +100,35 @@ class RewriteView(context: Context, firstPrompt: RewritePrompts.Prompt?) : Frame
 
     /** Reads the field again and asks SmolChat for [prompt]. */
     private fun start() {
-        job?.cancel()
-        answer = null
-        setButtons(working = true)
-        val ic = ForkAi.inputConnection
-        val read = ic?.let { FieldText.read(it) }
-        target = read
+        val read = ForkAi.inputConnection?.let { FieldText.read(it) }
         if (read == null) {
+            RewriteSession.end()
             card.showMessage(R.string.fork_ai_empty)
             setButtons(working = false)
             retry.isVisible = false
             return
         }
-        card.showProgress(R.string.fork_ai_reading)
-        job = scope.launch {
-            try {
-                run(read)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: SmolChat.Failure) {
-                showProblem(e.problem)
-            } catch (e: ConnectException) {
-                showProblem(SmolChat.Problem.NOT_RUNNING)
-            } catch (e: Exception) {
-                showProblem(SmolChat.Problem.FAILED)
-            }
-        }
+        RewriteSession.start(context, prompt, read, ForkAi.currentEditorInfo)
     }
 
-    private suspend fun run(read: FieldText.Target) {
-        if (!SmolChat.isInstalled(context)) throw SmolChat.Failure(SmolChat.Problem.NOT_INSTALLED)
-        val pairing = LocalAiPairing.get(context) ?: throw SmolChat.Failure(SmolChat.Problem.NOT_PAIRED)
-        var health = SmolChat.health(pairing.baseUrl)
-        if (health == null) {
-            card.showProgress(R.string.fork_ai_starting)
-            when (SmolChat.wake(context)) {
-                SmolChat.Wake.STARTED -> Unit
-                SmolChat.Wake.NOT_PAIRED -> throw SmolChat.Failure(SmolChat.Problem.NOT_PAIRED)
-                SmolChat.Wake.NO_MODEL -> throw SmolChat.Failure(SmolChat.Problem.NO_MODEL)
-                else -> throw SmolChat.Failure(SmolChat.Problem.NOT_RUNNING)
-            }
-            for (attempt in 1..WAKE_POLLS) {
-                health = SmolChat.health(pairing.baseUrl)
-                if (health != null) break
-                delay(WAKE_POLL_MS)
-            }
-            if (health == null) throw SmolChat.Failure(SmolChat.Problem.NOT_RUNNING)
+    private fun render(state: RewriteSession.State?) {
+        keepScreenOn = RewriteSession.isWorking // a long rewrite shouldn't end because the screen timed out
+        when (state) {
+            null -> return
+            is RewriteSession.State.Working -> card.showProgress(state.message)
+            is RewriteSession.State.Answer -> card.showText(state.caption, state.text)
+            is RewriteSession.State.Failed -> return showProblem(state.problem)
         }
-        if (health == "no_model") throw SmolChat.Failure(SmolChat.Problem.NO_MODEL)
-        card.showProgress(if (health == "loading" || health == "idle") R.string.fork_ai_loading else R.string.fork_ai_reading)
-
-        // give up when nothing arrives for 90 seconds; once text flows, the stream's own timeout applies
-        var started = false
-        val watchdog = scope.launch {
-            delay(FIRST_TOKEN_TIMEOUT_MS)
-            if (!started) {
-                job?.cancel()
-                showProblem(null)
-            }
-        }
-        val caption = when (read.scope) {
-            FieldText.Scope.SELECTION -> context.getString(R.string.fork_ai_selection)
-            FieldText.Scope.AROUND_CURSOR -> context.getString(R.string.fork_ai_partial)
-            FieldText.Scope.FIELD -> prompt.name
-        }
-        try {
-            SmolChat.stream(pairing, RewritePrompts.messages(prompt, read.text), RewritePrompts.maxTokens(read.text)).collect { text ->
-                started = true
-                card.showText(caption, RewritePrompts.clean(text))
-            }
-        } finally {
-            watchdog.cancel()
-        }
-        val cleaned = RewritePrompts.clean(card.text.text.toString())
-        if (cleaned.isEmpty()) throw SmolChat.Failure(SmolChat.Problem.FAILED)
-        answer = cleaned
-        setButtons(working = false)
+        setButtons(working = RewriteSession.isWorking)
     }
 
     private fun onAccept() {
-        val t = target ?: return
-        val a = answer ?: return
+        val t = RewriteSession.target ?: return
+        val a = RewriteSession.answer ?: return
         if (ForkAi.accept(t, a)) {
             ForkPanels.close()
         } else {
-            answer = null
+            RewriteSession.end()
             card.showMessage(R.string.fork_ai_changed)
             setButtons(working = false)
         }
@@ -195,7 +136,6 @@ class RewriteView(context: Context, firstPrompt: RewritePrompts.Prompt?) : Frame
 
     /** [problem] null means the 90 seconds ran out. */
     private fun showProblem(problem: SmolChat.Problem?) {
-        answer = null
         val text = when (problem) {
             null -> R.string.fork_ai_err_timeout
             SmolChat.Problem.NOT_INSTALLED -> R.string.fork_ai_err_not_installed
@@ -221,13 +161,10 @@ class RewriteView(context: Context, firstPrompt: RewritePrompts.Prompt?) : Frame
     private fun setButtons(working: Boolean) {
         retry.isVisible = true
         PanelKit.setReady(retry, !working)
-        PanelKit.setReady(accept, !working && answer != null)
+        PanelKit.setReady(accept, !working && RewriteSession.answer != null)
     }
 
     private companion object {
-        const val FIRST_TOKEN_TIMEOUT_MS = 90_000L
-        const val WAKE_POLLS = 20
-        const val WAKE_POLL_MS = 500L
         const val SERVER_RELEASES = "https://github.com/Staninna/SmolChatServer/releases"
     }
 }

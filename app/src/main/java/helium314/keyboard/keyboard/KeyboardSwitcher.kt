@@ -304,7 +304,7 @@ class KeyboardSwitcher private constructor() {
 
     private fun setMainKeyboardFrame(settingsValues: SettingsValues, toggleState: KeyboardSwitchState) {
         val inputView = inputView ?: return
-        helium314.keyboard.fork.ForkPanels.close() // fork: a keyboard switch closes the panel over the keyboard
+        helium314.keyboard.fork.ForkPanels.onKeyboardSwitch() // fork: a keyboard switch takes the panel down, a running rewrite comes back
         val isGone = isImeSuppressedByHardwareKeyboard(settingsValues, toggleState)
         inputView.stripContainer.isVisible = latinIME.hasSuggestionStripView()
         PointerTracker.switchTo(inputView.keyboardView)

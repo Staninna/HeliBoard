@@ -697,6 +697,7 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onStartInput(final EditorInfo editorInfo, final boolean restarting) {
+        helium314.keyboard.fork.AutofillChips.onStartInput(editorInfo); // fork: autofill chips belong to one field
         mHandler.onStartInput(editorInfo, restarting);
     }
 
@@ -1168,6 +1169,7 @@ public class LatinIME extends InputMethodService implements
 
         final List<InlineSuggestion> inlineSuggestions = response.getInlineSuggestions();
         if (inlineSuggestions.isEmpty()) {
+            helium314.keyboard.fork.AutofillChips.clear(); // fork
             return false;
         }
 
@@ -1177,6 +1179,8 @@ public class LatinIME extends InputMethodService implements
         mHandler.cancelResumeSuggestions();
 
         mSuggestionStripView.setExternalSuggestionView(inlineSuggestionView, true);
+        mSuggestionStripView.setToolbarVisibility(false); // fork: the toolbar would cover the chips
+        helium314.keyboard.fork.AutofillChips.onChips(inlineSuggestionView); // fork: an empty bar shows them again
 
         return true;
     }
@@ -1392,6 +1396,7 @@ public class LatinIME extends InputMethodService implements
     // and there is a selection of text or it's the start of a line.
     @Override
     public void setNeutralSuggestionStrip() {
+        if (helium314.keyboard.fork.AutofillChips.showInstead(mSuggestionStripView)) return; // fork: keep autofill chips
         final SettingsValues currentSettings = mSettings.getCurrent();
         if (tryShowClipboardSuggestion()) {
             // clipboard suggestion has been set
@@ -1420,6 +1425,7 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void removeExternalSuggestions() {
+        helium314.keyboard.fork.AutofillChips.clear(); // fork: the user closed the chips
         setNeutralSuggestionStrip();
         mHandler.postResumeSuggestions(false);
     }

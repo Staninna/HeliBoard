@@ -46,9 +46,10 @@ object ForkPanels {
     val isToolsGridOpen get() = overlay is ToolsGridView
     val isOpen get() = overlay != null
 
-    fun showRewrite(prompt: helium314.keyboard.fork.ai.RewritePrompts.Prompt?) {
+    fun showRewrite(prompt: helium314.keyboard.fork.ai.RewritePrompts.Prompt?, resuming: Boolean = false) {
         val context = KeyboardSwitcher.getInstance().wrapperView?.context ?: return
-        show(helium314.keyboard.fork.ai.RewriteView(context, prompt), context.getString(R.string.rewrite))
+        if (!resuming) helium314.keyboard.fork.ai.RewriteSession.end() // a new rewrite, not the one left running
+        show(helium314.keyboard.fork.ai.RewriteView(context, prompt), context.getString(R.string.rewrite), resuming)
     }
 
     fun showTranslate() {
@@ -82,8 +83,33 @@ object ForkPanels {
         show(ResizeView(KeyboardSwitcher.getInstance().wrapperView?.context ?: return))
     }
 
+    /** The user closed the panel, or opened another one: a rewrite still going on ends with it. */
     @JvmStatic
     fun close() {
+        helium314.keyboard.fork.ai.RewriteSession.end()
+        removeOverlay()
+    }
+
+    /**
+     * The keyboard reloaded, for example when it comes back after another app or the screen was off.
+     * The panel goes, but a rewrite on this field keeps going and its panel comes back once the
+     * keyboard is laid out again.
+     */
+    @JvmStatic
+    fun onKeyboardSwitch() {
+        removeOverlay()
+        if (!helium314.keyboard.fork.ai.RewriteSession.isActive) return
+        // the field's editor info only arrives after this reload, so which field it is gets checked later
+        val keyboard = KeyboardSwitcher.getInstance().visibleKeyboardView ?: return
+        keyboard.post { keyboard.doOnLayout { reopenRewrite() } }
+    }
+
+    private fun reopenRewrite() {
+        if (isOpen || !helium314.keyboard.fork.ai.RewriteSession.belongsTo(helium314.keyboard.fork.ai.ForkAi.currentEditorInfo)) return
+        showRewrite(null, resuming = true)
+    }
+
+    private fun removeOverlay() {
         ForkKeys.setSelectMode(false)
         hideTitleBar()
         val view = overlay ?: return
@@ -145,8 +171,8 @@ object ForkPanels {
     }
 
     /** Shows [view] over the keys. With a [title], a bar with that title and a back arrow covers the suggestion strip. */
-    private fun show(view: View, title: String? = null): Boolean {
-        close()
+    private fun show(view: View, title: String? = null, resuming: Boolean = false): Boolean {
+        if (resuming) removeOverlay() else close()
         helium314.keyboard.fork.ai.ForkAi.onKey() // a panel covers the keys: no proofread or undo offer behind it
         val switcher = KeyboardSwitcher.getInstance()
         val wrapper = switcher.wrapperView ?: return false
